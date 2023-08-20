@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		  <script src="https://unpkg.com/htmx.org@1.9.4"></script>
+		  <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+		<style>
+		.button { border: 1px solid black; padding: 10px; float: left; width: 64px}
+		.button .wiring {diplay: none; visibility: hidden;}
+		.button input {width:15%;}
+		.button:hover .wiring { visibility: visible}
+		.wiring { }
+		.keyboard{display: flex; border: 2px solid black; padding: 10px; flex-direction: column;}
+		.row {display:flex;}
+		</style>
+	</head>
+	<body>
+		<h1>Keyboard Configurator</h1>
+		<div>
+			
+		</div>
+		<div class="keyboard">
+			<div class="row">
+				<div class="button">
+					<input list="keycode" name="key1,1"></input>
+					<div class="wiring">
+						<input list="col_pins"></input>
+						<input list="row_pins"></input>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="button">
+					<input name="key2,1"></input>
+					<div class="wiring">
+						<input list="col_pins"></input>
+						<input list="row_pins"></input>
+					</div>
+				</div>
+
+			</div>
+			<div hx-get="/keycodes" hx-trigger="load"></div>
+			<datalist id="col_pins">
+				<option>1</option>
+			</datalist>
+			<datalist id="row_pins">
+				<option>1</option>
+			</datalist>
+		</div><br>
+		<div hx-post="/configdownload" hx-trigger="load" id="donwloadconfigbbutton" hx-include ="[name^='key']" hx-ext='json-enc'>
+
+		</div>
+	</body>
+
+</html>
