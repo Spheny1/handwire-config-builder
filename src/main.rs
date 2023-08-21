@@ -1,30 +1,33 @@
-use axum::{response::Html, routing::{get, post}, Router, Server, middleware, extract::Query, TypedHeader, response::IntoResponse, headers::ContentType};
+use axum::{response::Html, routing::{get, post}, Router, Server, middleware, extract::Query, TypedHeader, response::IntoResponse, headers::ContentType, Extension};
 use std::net::SocketAddr;
 use base64::{encode};
-use rusqlite::{params};
-use tokio_rusqlite::{Connection,Result};
+use tokio_rusqlite::{Connection};
 use crate::keyboard::get_keyboard_by_id;
+use std::sync::Arc;
 mod keyboard;
-macro_rules! ok(($result:expr) => ($result.unwrap()));
 
+struct State{
+    connection: Connection,
+}
 
 #[tokio::main]
 async fn main() {
+    let state = Arc::new(State{ connection: Connection::open("/home/kyle/Workspace/handwire-config-builder-htmx/resources/testdb.db").await.expect("Couldnt open DB")}); 
     let app = Router::new().route("/",get(index))
-        .route("/configdownload",post(configHandler))
-        .route("/keycodes",get(keycodeHandler));
+        .route("/configdownload",post(config_handler))
+        .route("/keycodes",get(keycode_handler))
+        .layer(Extension(state));
   //      .route("/keyboard",get(keyboardHandler));
     let listener = SocketAddr::from(([127,0,0,1],3000));
     Server::bind(&listener).serve(app.into_make_service()).await.unwrap();
 }
 
-async fn index() -> impl IntoResponse {
-    let connection = Connection::open("/home/kyle/Workspace/handwire-config-builder-htmx/resources/testdb.db").await.expect("Couldnt open DB");
-    println!("{:?}", get_keyboard_by_id(&connection, 0).await);    
+async fn index(connection: Extension<Arc<State>>) -> impl IntoResponse {
+        println!("{:?}", get_keyboard_by_id(&connection.connection, 0).await);    
     (TypedHeader(ContentType::html()),include_str!("../resources/index.html"),)
 }
 
-async fn configHandler(body: String) -> impl IntoResponse{
+async fn config_handler(body: String) -> impl IntoResponse{
      //println!("{}", body); 
     let row_pins = "(board.GP14, board.GP15, board.GP16, board.GP17, board.GP18)";
     let col_pins = "(board.GP0, board.GP1, board.GP2, board.GP3, board.GP4, board.GP5, board.GP6, board.GP7, board.GP8, board.GP9, board.GP10, board.GP11, board.GP12, board.GP13)";
@@ -36,7 +39,7 @@ async fn configHandler(body: String) -> impl IntoResponse{
     (TypedHeader(ContentType::html()), config_html)
 }
 
-async fn keycodeHandler() -> impl IntoResponse{
+async fn keycode_handler() -> impl IntoResponse{
     let options = include_str!("../resources/keycode.html");
     (TypedHeader(ContentType::html()),options)
 }
