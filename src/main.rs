@@ -1,15 +1,12 @@
 use axum::{response::Html, routing::{get, post}, Router, Server, middleware, extract::Query, TypedHeader, response::IntoResponse, headers::ContentType};
 use std::net::SocketAddr;
 use base64::{encode};
-use rusqlite::{Connection, params,Result};
-
+use rusqlite::{params};
+use tokio_rusqlite::{Connection,Result};
+use crate::keyboard::get_keyboard_by_id;
+mod keyboard;
 macro_rules! ok(($result:expr) => ($result.unwrap()));
 
-#[derive(Debug)]
-struct Keyboard{
-    id: i32,
-    name: String,
-}
 
 #[tokio::main]
 async fn main() {
@@ -22,18 +19,13 @@ async fn main() {
 }
 
 async fn index() -> impl IntoResponse {
-    let connection = Connection::open("/home/kyle/Workspace/handwire-config-builder-htmx/resources/testdb.db").expect("Couldnt open DB");
-    let mut stmt = connection.prepare("select * from keyboards").unwrap();
-    let mut rows = stmt.query([]).unwrap();
-    while let Ok(Some(row)) = rows.next(){
-        println!("{}", row.get::<_,i32>(0).unwrap());
-    }
-    
+    let connection = Connection::open("/home/kyle/Workspace/handwire-config-builder-htmx/resources/testdb.db").await.expect("Couldnt open DB");
+    println!("{:?}", get_keyboard_by_id(&connection, 0).await);    
     (TypedHeader(ContentType::html()),include_str!("../resources/index.html"),)
 }
 
 async fn configHandler(body: String) -> impl IntoResponse{
-     println!("{}", body); 
+     //println!("{}", body); 
     let row_pins = "(board.GP14, board.GP15, board.GP16, board.GP17, board.GP18)";
     let col_pins = "(board.GP0, board.GP1, board.GP2, board.GP3, board.GP4, board.GP5, board.GP6, board.GP7, board.GP8, board.GP9, board.GP10, board.GP11, board.GP12, board.GP13)";
     let keymaps = "[ \n     #Layer 0 - base layer \n     [KC.ESC   ,KC.N1    ,KC.N2    ,KC.N3    ,KC.N4    ,KC.N5    ,KC.N6    ,KC.N7    ,KC.N8    ,KC.N9    ,KC.N0    ,KC.MINUS ,KC.EQUAL ,KC.BKSP  , \n      KC.TAB   ,KC.Q     ,KC.W     ,KC.E     ,KC.R     ,KC.T     ,KC.Y     ,KC.U     ,KC.I     ,KC.O     ,KC.P     ,KC.LBRC  ,KC.RBRC  ,KC.BSLASH, \n      KC.CAPS  ,KC.A     ,KC.S     ,KC.D     ,KC.F     ,KC.G     ,KC.H     ,KC.J     ,KC.K     ,KC.L     ,KC.SCLN  ,KC.QUOT  ,KC.NO    ,KC.ENTER , \n      KC.LSHIFT,KC.NO    ,KC.Z     ,KC.X     ,KC.C     ,KC.V     ,KC.B     ,KC.N     ,KC.M     ,KC.COMM  ,KC.DOT   ,KC.SLSH  ,KC.SLSH  ,KC.RSHIFT, \n      KC.LCTRL ,KC.LGUI  ,KC.MO(1) ,KC.NO    ,KC.NO    ,KC.NO    ,KC.SPACE ,KC.NO    ,KC.NO    ,KC.NO    ,KC.RALT  ,KC.NO    ,KC.RGUI  ,KC.RCTRL ], \n     #Layer 1 - function layer left \n     [KC.TILDE ,KC.F1    ,KC.F2    ,KC.F3    ,KC.F4    ,KC.F5    ,KC.F6    ,KC.F7    ,KC.F8    ,KC.F9    ,KC.F10   ,KC.F11   ,KC.F12   ,KC.DELETE, \n      KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.UP    ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  , \n      KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.LEFT  ,KC.DOWN  ,KC.RIGHT ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  , \n      KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  , \n      KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ,KC.RALT  ,KC.TRNS  ,KC.TRNS  ,KC.TRNS  ] \n ] ";

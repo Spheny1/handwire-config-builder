@@ -10,5 +10,6 @@ axum = {version = "0.6.20", features = ["headers"] }
 base64 = "0.21.2"
 rusqlite = "0.29.0"
 tokio = { version = "1.29.0", features = ["full"]}
+tokio-rusqlite = "0.4.0"
 tower = "0.4.13"
 tower-http = { version = "0.4.3", features = ["fs"] }
