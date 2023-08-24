@@ -9,6 +9,8 @@ edition = "2021"
 axum = {version = "0.6.20", features = ["headers"] }
 base64 = "0.21.2"
 rusqlite = "0.29.0"
+serde = { version = "1.0.186", features =["derive"] }
+serde_json = "1.0.105"
 tokio = { version = "1.29.0", features = ["full"]}
 tokio-rusqlite = "0.4.0"
 tower = "0.4.13"
