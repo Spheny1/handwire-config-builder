@@ -1,7 +1,7 @@
-use axum::{response::Html, routing::{get, post}, Router, Server, middleware, extract::Query, TypedHeader, response::IntoResponse, headers::ContentType, Extension};
+use axum::{response::Html, routing::{get, post}, Router, Server, middleware, extract, TypedHeader, response::IntoResponse, headers::ContentType, Extension};
 use std::net::SocketAddr;
 use tokio_rusqlite::{Connection};
-use crate::keyboard::get_keyboard_by_id;
+use crate::keyboard::{get_keyboard_by_id, Keyboard};
 use crate::download_config::generate_config_file;
 use std::sync::Arc;
 mod keyboard;
@@ -13,7 +13,7 @@ struct State{
 
 #[tokio::main]
 async fn main() {
-    let state = Arc::new(State{ connection: Connection::open("/home/kyle/Workspace/handwire-config-builder-htmx/resources/local.db").await.expect("Couldnt open DB")}); 
+    let state = Arc::new(State{ connection: Connection::open("/home/kyle/Workspace/handwire-config-builder/resources/local.db").await.expect("Couldnt open DB")}); 
     let app = Router::new().route("/",get(index))
         .route("/configdownload",post(config_handler))
         .route("/keycodes",get(keycode_handler))
@@ -24,12 +24,13 @@ async fn main() {
 }
 
 async fn index(connection: Extension<Arc<State>>) -> impl IntoResponse {
-        println!("{:?}", get_keyboard_by_id(&connection.connection, 0).await);    
+        //println!("{:?}", get_keyboard_by_id(&connection.connection, 0).await);    
     (TypedHeader(ContentType::html()),include_str!("../resources/index.html"),)
 }
 
-async fn config_handler(body: String) -> impl IntoResponse{
-    let config_html = generate_config_file(serde_json::from_str(&body).unwrap());
+async fn config_handler(extract::Json(payload): extract::Json<Keyboard>) -> impl IntoResponse{
+//    println!("{:?}", payload);
+    let config_html = generate_config_file(payload);
 
     (TypedHeader(ContentType::html()), config_html)
 }

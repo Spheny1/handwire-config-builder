@@ -46,7 +46,19 @@
 				<option>1</option>
 			</datalist>
 		</div><br>
-		<div hx-post="/configdownload" hx-trigger="load" id="donwloadconfigbbutton" hx-include ="[name^='key']" hx-ext='json-enc'>
+		<!--This is a comment. Comments are not displayed in the browser-->
+		<script>
+			function makeConifgRequestJson(){
+				event.detail.parameters.id = 0; 
+                		event.detail.parameters.name = 'test'; 
+                		event.detail.parameters.row = '[0,1,2,3,4]';
+                		event.detail.parameters.column = '[5,6,7,8,9,10,11,12,13,14]';
+                		event.detail.parameters.orientation = 'col2row'; 
+                		event.detail.parameters.layout = '[[1,2,3],[4,5,6],[7,8,9]]';
+				event.detail.headers['Content-Type'] = 'application/json';
+			}
+		</script>
+		<div hx-post="/configdownload" hx-trigger="load" id="donwloadconfigbbutton" hx-on="htmx:configRequest: makeConifgRequestJson()" hx-ext='json-enc'>
 
 		</div>
 	</body>
