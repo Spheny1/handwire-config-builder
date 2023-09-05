@@ -18,19 +18,31 @@
 		<div>
 			
 		</div>
-		<div class="keyboard">
+		<div class="keyboard" hx-get="/keyboard" hx-params="id" hx-trigger="load">
+			<div>
+				<label for="orientation">Orientation:</label>
+				<select name="orientation" id="orientation">
+					<option value="col2row">Col2Row</option>
+					<option value="row2col">Row2Col</option>
+				</select>
+			</div>
 			<div class="row">
 				<div class="button">
-					<input list="keycode" name="key1,1"></input>
+					<input list="keycode" class="key"></input>
 					<div class="wiring">
 						<input list="col_pins"></input>
 						<input list="row_pins"></input>
 					</div>
 				</div>
-			</div>
-			<div class="row">
 				<div class="button">
-					<input name="key2,1"></input>
+					<input list="keycode" class="key"></input>
+					<div class="wiring">
+						<input list="col_pins"></input>
+						<input list="row_pins"></input>
+					</div>
+				</div>
+				<div class="button">
+					<input list="keycode" class="key"></input>
 					<div class="wiring">
 						<input list="col_pins"></input>
 						<input list="row_pins"></input>
@@ -38,27 +50,83 @@
 				</div>
 
 			</div>
-			<div hx-get="/keycodes" hx-trigger="load"></div>
+			<div class="row">
+				<div class="button">
+					<input list="keycode" class="key"></input>
+					<div class="wiring">
+						<input list="col_pins"></input>
+						<input list="row_pins"></input>
+					</div>
+				</div>
+				<div class="button">
+					<input list="keycode" class="key"></input>
+					<div class="wiring">
+						<input list="col_pins"></input>
+						<input list="row_pins"></input>
+					</div>
+				</div>
+				<div class="button">
+					<input list="keycode" class="key"></input>
+					<div class="wiring">
+						<input list="col_pins"></input>
+						<input list="row_pins"></input>
+					</div>
+				</div>
+
+			</div>
+			<div class="row">
+				<div class="button">
+					<input list="keycode" class="key"></input>
+					<div class="wiring">
+						<input list="col_pins"></input>
+						<input list="row_pins"></input>
+					</div>
+				</div>
+				<div class="button">
+					<input list="keycode" class="key"></input>
+					<div class="wiring">
+						<input list="col_pins"></input>
+						<input list="row_pins"></input>
+					</div>
+				</div>
+				<div class="button">
+					<input list="keycode" class="key"></input>
+					<div class="wiring">
+						<input list="col_pins"></input>
+						<input list="row_pins"></input>
+					</div>
+				</div>
+
+			</div>
+	
+		</div><br>
+		<div hx-get="/keycodes" hx-trigger="load"></div>
 			<datalist id="col_pins">
 				<option>1</option>
 			</datalist>
 			<datalist id="row_pins">
 				<option>1</option>
 			</datalist>
-		</div><br>
+
 		<!--This is a comment. Comments are not displayed in the browser-->
 		<script>
-			function makeConifgRequestJson(){
-				event.detail.parameters.id = 0; 
-                		event.detail.parameters.name = 'test'; 
+			function makeConfigRequestJson(){
+			        event.detail.parameters.name = 'test'; 
                 		event.detail.parameters.row = '[0,1,2,3,4]';
                 		event.detail.parameters.column = '[5,6,7,8,9,10,11,12,13,14]';
                 		event.detail.parameters.orientation = 'col2row'; 
-                		event.detail.parameters.layout = '[[1,2,3],[4,5,6],[7,8,9]]';
 				event.detail.headers['Content-Type'] = 'application/json';
+				let layout = [];
+				let keys = document.getElementsByClassName("key");
+				event.detail.parameters.id = 0;
+				for( key of keys){
+					layout.push(key.value);
+				}
+					
+				event.detail.parameters.layout = layout;
 			}
 		</script>
-		<div hx-post="/configdownload" hx-trigger="load" id="donwloadconfigbbutton" hx-on="htmx:configRequest: makeConifgRequestJson()" hx-ext='json-enc'>
+		<div hx-post="/configdownload" hx-trigger="load" id="donwloadconfigbbutton" hx-on="htmx:configRequest: makeConfigRequestJson()" hx-ext='json-enc'>
 
 		</div>
 	</body>
