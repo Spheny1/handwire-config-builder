@@ -4,12 +4,12 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Keyboard {
-    id: i32,
-    name: String,
-    row: Vec<String>,
-    column: Vec<String>,
-    orientation: String,
-    layout: Vec<String>,
+    pub id: i32,
+    pub name: String,
+    pub row: Vec<String>,
+    pub column: Vec<String>,
+    pub orientation: String,
+    pub layout: Vec<String>,
 //    img: String,
 }
 

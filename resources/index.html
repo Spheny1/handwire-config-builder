@@ -22,8 +22,8 @@
 			<div>
 				<label for="orientation">Orientation:</label>
 				<select name="orientation" id="orientation">
-					<option value="col2row">Col2Row</option>
-					<option value="row2col">Row2Col</option>
+					<option value="COL2ROW">Col2Row</option>
+					<option value="ROW_2COL">Row2Col</option>
 				</select>
 			</div>
 			<div class="row">
@@ -112,17 +112,16 @@
 		<script>
 			function makeConfigRequestJson(){
 			        event.detail.parameters.name = 'test'; 
-                		event.detail.parameters.row = '[0,1,2,3,4]';
-                		event.detail.parameters.column = '[5,6,7,8,9,10,11,12,13,14]';
-                		event.detail.parameters.orientation = 'col2row'; 
+                		event.detail.parameters.row = ["14","15","16","17","18"];
+                		event.detail.parameters.column = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13'];
+                		event.detail.parameters.orientation = document.getElementById("orientation").value; 
 				event.detail.headers['Content-Type'] = 'application/json';
 				let layout = [];
 				let keys = document.getElementsByClassName("key");
 				event.detail.parameters.id = 0;
 				for( key of keys){
 					layout.push(key.value);
-				}
-					
+				}		
 				event.detail.parameters.layout = layout;
 			}
 		</script>
