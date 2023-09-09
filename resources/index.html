@@ -18,87 +18,8 @@
 		<div>
 			
 		</div>
-		<div class="keyboard" hx-get="/keyboard" hx-params="id" hx-trigger="load">
-			<div>
-				<label for="orientation">Orientation:</label>
-				<select name="orientation" id="orientation">
-					<option value="COL2ROW">Col2Row</option>
-					<option value="ROW_2COL">Row2Col</option>
-				</select>
-			</div>
-			<div class="row">
-				<div class="button">
-					<input list="keycode" class="key"></input>
-					<div class="wiring">
-						<input list="col_pins"></input>
-						<input list="row_pins"></input>
-					</div>
-				</div>
-				<div class="button">
-					<input list="keycode" class="key"></input>
-					<div class="wiring">
-						<input list="col_pins"></input>
-						<input list="row_pins"></input>
-					</div>
-				</div>
-				<div class="button">
-					<input list="keycode" class="key"></input>
-					<div class="wiring">
-						<input list="col_pins"></input>
-						<input list="row_pins"></input>
-					</div>
-				</div>
+		<div class="keyboard" hx-get="/keyboard"  hx-trigger="load">
 
-			</div>
-			<div class="row">
-				<div class="button">
-					<input list="keycode" class="key"></input>
-					<div class="wiring">
-						<input list="col_pins"></input>
-						<input list="row_pins"></input>
-					</div>
-				</div>
-				<div class="button">
-					<input list="keycode" class="key"></input>
-					<div class="wiring">
-						<input list="col_pins"></input>
-						<input list="row_pins"></input>
-					</div>
-				</div>
-				<div class="button">
-					<input list="keycode" class="key"></input>
-					<div class="wiring">
-						<input list="col_pins"></input>
-						<input list="row_pins"></input>
-					</div>
-				</div>
-
-			</div>
-			<div class="row">
-				<div class="button">
-					<input list="keycode" class="key"></input>
-					<div class="wiring">
-						<input list="col_pins"></input>
-						<input list="row_pins"></input>
-					</div>
-				</div>
-				<div class="button">
-					<input list="keycode" class="key"></input>
-					<div class="wiring">
-						<input list="col_pins"></input>
-						<input list="row_pins"></input>
-					</div>
-				</div>
-				<div class="button">
-					<input list="keycode" class="key"></input>
-					<div class="wiring">
-						<input list="col_pins"></input>
-						<input list="row_pins"></input>
-					</div>
-				</div>
-
-			</div>
-	
 		</div><br>
 		<div hx-get="/keycodes" hx-trigger="load"></div>
 			<datalist id="col_pins">

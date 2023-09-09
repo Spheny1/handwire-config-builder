@@ -1,7 +1,7 @@
-use axum::{response::Html, routing::{get, post}, Router, Server, middleware, extract, TypedHeader, response::IntoResponse, headers::ContentType, Extension};
+use axum::{routing::{get, post}, Router, Server,  extract, TypedHeader, response::IntoResponse, headers::ContentType, Extension};
 use std::net::SocketAddr;
 use tokio_rusqlite::{Connection};
-use crate::keyboard::{get_keyboard_by_id, Keyboard, buildKeyboardHtml};
+use crate::keyboard::{get_keyboard_by_id, Keyboard, build_keyboard_html};
 use crate::download_config::generate_config_file;
 use std::sync::Arc;
 use serde::{Deserialize};
@@ -46,11 +46,11 @@ async fn keycode_handler() -> impl IntoResponse{
 struct KeyboardParams{
     id: u32,
 }
-async fn keyboard_handler( connection: Extension<Arc<State>>,keyboardParams: extract::Query<KeyboardParams>) -> impl IntoResponse{
-    let keyboardParams: KeyboardParams = keyboardParams.0;
-    let keyboard = get_keyboard_by_id(&connection.connection, keyboardParams.id).await;
+async fn keyboard_handler( connection: Extension<Arc<State>>) -> impl IntoResponse{
+    let keyboard_params: KeyboardParams = KeyboardParams{id:0};
+    let keyboard = get_keyboard_by_id(&connection.connection, keyboard_params.id).await;
     println!("{:?}", keyboard);   
-    (TypedHeader(ContentType::html()), buildKeyboardHtml(keyboard)) 
+    (TypedHeader(ContentType::html()), build_keyboard_html(keyboard)) 
     
 }
 //async fn keyboardHandler(Path(params) : Path<Vec<(String,String)>>) -> impl IntoResponse{
