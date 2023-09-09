@@ -112,14 +112,16 @@
 		<script>
 			function makeConfigRequestJson(){
 			        event.detail.parameters.name = 'test'; 
-                		event.detail.parameters.row = ["14","15","16","17","18"];
-                		event.detail.parameters.column = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13'];
+                		event.detail.parameters.row = ["14","15","16"];
+                		event.detail.parameters.column = ['0','1','2'];
                 		event.detail.parameters.orientation = document.getElementById("orientation").value; 
 				event.detail.headers['Content-Type'] = 'application/json';
 				let layout = [];
 				let keys = document.getElementsByClassName("key");
 				event.detail.parameters.id = 0;
 				for( key of keys){
+					console.log(key);
+					console.log(key.value);
 					layout.push(key.value);
 				}		
 				event.detail.parameters.layout = layout;
