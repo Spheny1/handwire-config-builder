@@ -1,7 +1,7 @@
 use rusqlite::{params};
 use tokio_rusqlite::{Connection};
 use serde::{Serialize, Deserialize};
-
+use serde_json::Result;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Keyboard {
     pub id: i32,
@@ -9,7 +9,7 @@ pub struct Keyboard {
     pub row: Vec<String>,
     pub column: Vec<String>,
     pub orientation: String,
-    pub layout: Vec<String>,
+    pub layout: Vec<Vec<String>>,
 //    img: String,
 }
 
@@ -27,7 +27,7 @@ pub async fn get_keyboard_by_id(conn: &Connection, id: u32) -> Keyboard {
                 row: row_string.split(",").map(|s| s.to_string()).collect(),
                 column: col_string.split(",").map(|s| s.to_string()).collect(),
                 orientation: row.get(4).unwrap(),
-                layout: layout_string.split(",").map(|s| s.to_string()).collect(),
+                layout: serde_json::from_str(&layout_string).unwrap(),
 //                img: row.get(6).unwrap(),
             })
         }).unwrap())
@@ -37,7 +37,7 @@ pub async fn get_keyboard_by_id(conn: &Connection, id: u32) -> Keyboard {
 
 pub fn build_keyboard_html(keyboard: Keyboard) -> String{
     let mut proto_layout = Vec::new();  
-    for key_row in keyboard.layout.chunks(keyboard.column.len()){
+    for key_row in keyboard.layout[0].chunks(keyboard.column.len()){
         proto_layout.push(format!(include_str!("../resources/row.html"),key_row.iter().map(|key| format!(include_str!("../resources/key-button.html"),key)).collect::<Vec<_>>().join("\n")));
     }
     format!(include_str!("../resources/keyboard.html"),proto_layout.join(",\n"))

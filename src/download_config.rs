@@ -8,7 +8,7 @@ pub fn generate_config_file(keyboard : Keyboard) -> String{
     let row_pins = format!("({})",keyboard.row.iter().map(|pin| format!("{}{}",io_prefix,pin)).collect::<Vec<_>>().join(","));
     let col_pins = format!("({})",keyboard.column.iter().map(|pin| format!("{}{}",io_prefix,pin)).collect::<Vec<_>>().join(","));
     let mut proto_layout = Vec::new();  
-    for key_row in keyboard.layout.chunks(keyboard.column.len()){
+    for key_row in keyboard.layout[0].chunks(keyboard.column.len()){
         proto_layout.push(format!("[{}]",key_row.iter().map(|key| format!("{}{}",key_prefix,key)).collect::<Vec<_>>().join(",")));
     }
     let keymaps = format!("[{}]",proto_layout.join(",\n"));
