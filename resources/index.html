@@ -4,13 +4,21 @@
 		  <script src="https://unpkg.com/htmx.org@1.9.4"></script>
 		  <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
 		<style>
-		.button { border: 1px solid black; padding: 10px; float: left; width: 64px}
-		.button .wiring {diplay: none; visibility: hidden;}
-		.button input {width:15%;}
-		.button:hover .wiring { visibility: visible}
-		.wiring { }
+		.button { border: 1px solid black; float: left; width: var(--keyheight)}
+		.1u {width: 48px; height: 48px;}
 		.keyboard{display: flex; border: 2px solid black; padding: 10px; flex-direction: column;}
-		.row {display:flex;}
+		.row { --keyheight: 48px; display:flex; height:var(--keyheight);}
+		.k1 {height:var(--keyheight)}
+		.k125 {height:calc(var(--keyheight) * 1.25)}
+		.k15 {height:calc(var(--keyheight) * 1.5)}
+		.k2 {height:calc(var(--keyheight) * 2)}
+		.k6 {height:calc(var(--keyheight) * 6)}
+		.k7 {height:calc(var(--keyheight) * 7)}
+		.k225 {height:calc(var(--keyheight) * 2.25)}
+		.k25 {height:calc(var(--keyheight) * 2.5)}
+		.hide {display:none;}
+		.show {display:inline;}
+		.key {background-color:transparent; border:0;box-sizing:border-box;text-align-center;}
 		</style>
 	</head>
 	<body>
@@ -18,7 +26,7 @@
 		<div>
 			
 		</div>
-		<div class="keyboard" hx-get="/keyboard"  hx-trigger="load">
+		<div class="keyboard" hx-get="/keyboard" ) hx-trigger="load">
 
 		</div><br>
 		<div hx-get="/keycodes" hx-trigger="load"></div>
@@ -33,22 +41,29 @@
 		<script>
 			function makeConfigRequestJson(){
 			        event.detail.parameters.name = 'test'; 
-                		event.detail.parameters.row = ["14","15","16"];
-                		event.detail.parameters.column = ['0','1','2'];
+                		event.detail.parameters.row = ["14","15","16","17","18"];
+                		event.detail.parameters.column = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13'];
                 		event.detail.parameters.orientation = document.getElementById("orientation").value; 
 				event.detail.headers['Content-Type'] = 'application/json';
 				let layout = [];
 				let keys = document.getElementsByClassName("key");
 				event.detail.parameters.id = 0;
+				let layer = [];
 				for( key of keys){
-					console.log(key);
-					console.log(key.value);
-					layout.push(key.value);
+					//console.log(key);
+					//console.log(key.value);
+					layer.push(key.value);
+					if(layer.length == event.detail.parameters.row.length * event.detail.parameters.column.length){
+						layout.push(layer);
+						while (layer.length > 0) {
+  							layer.pop();
+						}
+					}
 				}		
 				event.detail.parameters.layout = layout;
 			}
 		</script>
-		<div hx-post="/configdownload" hx-trigger="load" id="donwloadconfigbbutton" hx-on="htmx:configRequest: makeConfigRequestJson()" hx-ext='json-enc'>
+		<div hx-post="/configdownload" hx-trigger="load" id="donwloadconfigbbutton" hx-on="htmx:configRequest: makeConfigRequestJson()" hx-ext='json-enc' hx-sync = ".keyboard:queue">
 
 		</div>
 	</body>

@@ -5,6 +5,24 @@
 			<option value="COL2ROW">Col2Row</option>
 			<option value="ROW_2COL">Row2Col</option>
 		</select>
+		<label for="layer">Layer:</label>
+		<select name="layer" id="layer" onchange="ChangeLayerVisibility(this.value)">
+			<option value="0">0</option>
+			<option value="1">1</option>
+		</select>
+		<script>
+			function ChangeLayerVisibility(selection){{
+				//console.log(selection);
+				allRows = document.querySelectorAll(".row");
+				for(row of allRows){{
+					row.classList.add("hide");	
+				}}
+				toMakeVisibile = document.querySelectorAll(".layer-" + selection.toString());
+				for(row of toMakeVisibile){{
+					row.classList.remove("hide");
+				}}
+			}}
+		</script>
 	</div>
 	<div>
 	{}

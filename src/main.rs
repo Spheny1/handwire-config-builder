@@ -49,7 +49,7 @@ struct KeyboardParams{
 async fn keyboard_handler( connection: Extension<Arc<State>>) -> impl IntoResponse{
     let keyboard_params: KeyboardParams = KeyboardParams{id:0};
     let keyboard = get_keyboard_by_id(&connection.connection, keyboard_params.id).await;
-    println!("{:?}", keyboard);   
+    //println!("{:?}", keyboard);   
     (TypedHeader(ContentType::html()), build_keyboard_html(keyboard)) 
     
 }
