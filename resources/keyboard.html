@@ -5,26 +5,55 @@
 			<option value="COL2ROW">Col2Row</option>
 			<option value="ROW_2COL">Row2Col</option>
 		</select>
-		<label for="layer">Layer:</label>
-		<select name="layer" id="layer" onchange="ChangeLayerVisibility(this.value)">
-			<option value="0">0</option>
-			<option value="1">1</option>
-		</select>
+		<div name="tab-holder" class="tab-holder">
+			<div class="tab tab-selected">
+				<button class="tab-button" onclick="ChangeTab(0, this)">tab1</button>
+			</div>
+			<div class="tab">
+				<button class="tab-button" onclick="ChangeTab(1, this)">tab2</button>
+			</div>
+			<div class = "tab">
+				<button class="tab-button" onclick="NewLayer(this)"> + </button>
+			</div>
+		</div>
 		<script>
-			function ChangeLayerVisibility(selection){{
-				//console.log(selection);
+			function ChangeTab(layer, tabToSelect){{
 				allRows = document.querySelectorAll(".row");
 				for(row of allRows){{
 					row.classList.add("hide");	
 				}}
-				toMakeVisibile = document.querySelectorAll(".layer-" + selection.toString());
+				toMakeVisibile = document.querySelectorAll(".layer-" + layer.toString());
 				for(row of toMakeVisibile){{
 					row.classList.remove("hide");
+				}}
+				document.querySelector(".tab-selected").classList.remove("tab-selected");
+				tabToSelect.parentElement.classList.add("tab-selected");
+
+			}}
+
+			function NewLayer(child){{
+				//Create the new tab
+				let newTab = document.querySelector(".tab");
+				numTabs = document.querySelectorAll(".tab").length - 1;
+				addedTab = document.querySelector(".tab-holder").insertBefore(newTab.cloneNode(true),child.parentElement);
+				addedTab.children[0].setAttribute( "onclick", "ChangeTab(" + numTabs.toString() + ",this)" );
+				addedTab.children[0].innerHTML = "tab" + (numTabs+1).toString();
+				//Maybe we want to select the newly created tab idk right now
+				addedTab.classList.remove("tab-selected");
+				//Create the new layer
+				let newLayer = document.querySelector("[name=\"layer"+(numTabs-1).toString()+"\"]");
+				console.log("[name=\"layer"+(numTabs-1).toString()+"\"]");
+				addedLayer = document.querySelector(".keyboard-container").appendChild(newLayer.cloneNode(true));
+				addedLayer.setAttribute("name","layer"+(numTabs).toString()+"");
+				for(row of addedLayer.children){{
+					row.classList.remove("layer-" + (numTabs-1).toString());
+					row.classList.add("layer-" + numTabs.toString());
+					row.classList.add("hide");
 				}}
 			}}
 		</script>
 	</div>
-	<div>
+	<div class="keyboard-container">
 	{}
 	</div>
 </div>

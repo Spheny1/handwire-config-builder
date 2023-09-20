@@ -4,10 +4,11 @@
 		  <script src="https://unpkg.com/htmx.org@1.9.4"></script>
 		  <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
 		<style>
-		.button { border: 1px solid black; float: left; width: var(--keyheight)}
+		.button { border: 1px solid black; float: left; width: var(--keyheight); border-radius: 5px; margin-right:3px;overflow:hidden;}
 		.1u {width: 48px; height: 48px;}
 		.keyboard{display: flex; border: 2px solid black; padding: 10px; flex-direction: column;}
-		.row { --keyheight: 48px; display:flex; height:var(--keyheight);}
+		.row { --keyheight: 48px; display:flex; height:var(--keyheight); margin-top: 3px;}
+		.tab-holder {display:flex}
 		.k1 {height:var(--keyheight)}
 		.k125 {height:calc(var(--keyheight) * 1.25)}
 		.k15 {height:calc(var(--keyheight) * 1.5)}
@@ -19,6 +20,9 @@
 		.hide {display:none;}
 		.show {display:inline;}
 		.key {background-color:transparent; border:0;box-sizing:border-box;text-align-center;}
+		.tab-button {outline: none; border: none; background-color: transparent;}
+		.tab { background-color: #FFFFFF}
+		.tab-selected { background-color: #D3D3D3}
 		</style>
 	</head>
 	<body>
