@@ -38,13 +38,12 @@ pub async fn get_keyboard_by_id(conn: &Connection, id: u32) -> Keyboard {
 pub fn build_keyboard_html(keyboard: Keyboard) -> String{
     let mut proto_layout = Vec::new();  
     for (index,layer) in keyboard.layout.iter().enumerate(){
-        let layer_string = format!("layer-{}",index.to_string());
         let mut proto_layer = Vec::new();
+        let to_hide = if index == 0 { "".to_string() } else { "hide".to_string() };
         for key_row in layer.chunks(keyboard.column.len()){
-            let to_hide = if index == 0 { "".to_string() } else { "hide".to_string() };
-            proto_layer.push(format!(include_str!("../resources/row.html"),layer_string,to_hide,key_row.iter().map(|key| format!(include_str!("../resources/key-button.html"),key)).collect::<Vec<_>>().join("\n")));
+            proto_layer.push(format!(include_str!("../resources/row.html"),key_row.iter().map(|key| format!(include_str!("../resources/key-button.html"),key)).collect::<Vec<_>>().join("\n")));
         }
-        proto_layout.push(format!(include_str!("../resources/row-container.html"),index,proto_layer.join("\n")));
+        proto_layout.push(format!(include_str!("../resources/row-container.html"),index,to_hide,proto_layer.join("\n")));
     }
     format!(include_str!("../resources/keyboard.html"),proto_layout.join("\n"))
 
