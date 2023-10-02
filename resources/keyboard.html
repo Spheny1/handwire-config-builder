@@ -6,14 +6,7 @@
 			<option value="ROW_2COL">Row2Col</option>
 		</select>
 		<div name="tab-holder" class="tab-holder">
-			<div class="tab tab-selected" name="tab0">
-				<button class="tab-button" onclick="ChangeTab(0, this)">tab1</button>
-				<button class="x-button" onclick="RemoveLayer(0, this)">X</button>
-			</div>
-			<div class="tab" name="tab1">
-				<button class="tab-button" onclick="ChangeTab(1, this)">tab2</button>
-				<button class="x-button" onclick="RemoveLayer(1, this)">X</button>
-			</div>
+			{}
 			<div class = "tab-new">
 				<button class="tab-button" onclick="NewLayer(this)"> + </button>
 			</div>
@@ -65,7 +58,6 @@
 				for(layer of document.querySelectorAll(".layer")){{
 					//loop thru layer and if 
 					let curLayer = parseInt(layer.getAttribute("name").slice(-1));
-					console.log(curLayer);
 					if(curLayer < layerNum){{ continue;}}
 					layer.setAttribute("name", "layer" + (curLayer-1).toString());
 				}}
@@ -73,7 +65,6 @@
 					//loop thru layer and if 
 					let curTab = parseInt(tab.getAttribute("name").slice(-1));
 					
-					console.log("curTab: " + curTab + " | tab: " + tab.children[0].innerHTML);
 					if(curTab < layerNum){{ console.log("we dont want to do anythiung here"); continue;}}
 					tab.children[0].setAttribute("onclick", "ChangeTab(" + (curTab-1).toString() + ",this)");
 					tab.children[0].innerHTML = "tab" + (curTab).toString();
