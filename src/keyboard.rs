@@ -48,6 +48,6 @@ pub fn build_keyboard_html(keyboard: Keyboard) -> String{
         }
         proto_layout.push(format!(include_str!("../resources/row-container.html"),index,to_hide,proto_layer.join("\n")));
     }
-    format!(include_str!("../resources/keyboard.html"),proto_tab.join("\n"), proto_layout.join("\n"))
+    format!(include_str!("../resources/keyboard.html"),proto_tab.join("\n"), proto_layout.join("\n"),"")
 
 }

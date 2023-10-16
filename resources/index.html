@@ -9,6 +9,7 @@
 		.keyboard{display: flex; border: 2px solid black; padding: 10px; flex-direction: column;}
 		.row { --keyheight: 48px; display:flex; height:var(--keyheight); margin-top: 3px;}
 		.tab-holder {display:flex}
+		.flex-container {display:flex;}
 		.k1 {height:var(--keyheight)}
 		.k125 {height:calc(var(--keyheight) * 1.25)}
 		.k15 {height:calc(var(--keyheight) * 1.5)}
@@ -24,6 +25,11 @@
 		.x-button {outline: none; border: none; background-color: transparent; color: red;}
 		.tab { background-color: #FFFFFF}
 		.tab-selected { background-color: #D3D3D3}
+		.right-tab {transform: rotate(-90deg)}
+		.vertical-flex {display: flex; flex-direction: column; justify-content: space-between; width:20px;}
+		.vertical-tab {writing-mode:vertical-lr; text-orientation: upright;}
+		.vertical-tab-selected { background-color: #D3D3D3; }
+		#wiring-svg{pointer-events: none; position: absolute;}
 		</style>
 	</head>
 	<body>
@@ -41,8 +47,6 @@
 			<datalist id="row_pins">
 				<option>1</option>
 			</datalist>
-
-		<!--This is a comment. Comments are not displayed in the browser-->
 		<script>
 			function makeConfigRequestJson(){
 			        event.detail.parameters.name = 'test'; 

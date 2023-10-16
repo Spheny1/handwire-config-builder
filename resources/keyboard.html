@@ -1,81 +1,232 @@
-<div>
-	<div>
-		<label for="orientation">Orientation:</label>
-		<select name="orientation" id="orientation">
-			<option value="COL2ROW">Col2Row</option>
-			<option value="ROW_2COL">Row2Col</option>
-		</select>
-		<div name="tab-holder" class="tab-holder">
-			{}
-			<div class = "tab-new">
-				<button class="tab-button" onclick="NewLayer(this)"> + </button>
+<div class="flex-container">
+<button onclick="AdjustSvg()">adjustsvg</button>
+	<div class="vertical-flex">
+		<div id="layout-tab" class="vertical-tab vertical-tab-selected">
+			<button class="tab-button" onclick="ChangeVerticalTab(false,this)">Layout</button>
+		</div>
+		<div id="wiring-tab" class="vertical-tab">
+			<button class="tab-button" onclick="ChangeVerticalTab(true,this)">Wiring</button>
+		</div>
+	</div>
+	
+	<div id="keyboard-container" class="keyboard-container">
+		<div>
+			<label for="orientation">Orientation:</label>
+			<select name="orientation" id="orientation">
+				<option value="COL2ROW">Col2Row</option>
+				<option value="ROW_2COL">Row2Col</option>
+			</select>
+			<div name="tab-holder" class="tab-holder">
+				{}
+				<div class = "tab-new">
+					<button class="tab-button" onclick="NewLayer(this)"> + </button>
+				</div>
 			</div>
 		</div>
-		<script>
-			function ChangeTab(layer, tabToSelect){{
-				allRows = document.querySelectorAll(".layer");
-				for(row of allRows){{
-					row.classList.add("hide");	
-				}}
-				toMakeVisibile = document.querySelectorAll("[name=layer" + layer.toString() + "]");
-				for(row of toMakeVisibile){{
-					row.classList.remove("hide");
-				}}
-				document.querySelector(".tab-selected").classList.remove("tab-selected");
-				tabToSelect.parentElement.classList.add("tab-selected");
-
-			}}
-
-			function NewLayer(child){{
-				//Create the new tab
-				let newTab = document.querySelector(".tab");
-				numTabs = document.querySelectorAll(".tab").length;
-				addedTab = document.querySelector(".tab-holder").insertBefore(newTab.cloneNode(true),child.parentElement);
-				addedTab.children[0].setAttribute( "onclick", "ChangeTab(" + numTabs.toString() + ",this)" );
-				addedTab.children[1].setAttribute( "onclick", "RemoveLayer(" + numTabs.toString() + ",this)" );
-				addedTab.children[0].innerHTML = "tab" + (numTabs+1).toString();
-				//Maybe we want to select the newly created tab idk right now
-				addedTab.classList.remove("tab-selected");
-				addedTab.setAttribute("name", "tab" + (numTabs).toString());
-				//Create the new layer
-				let newLayer = document.querySelector("[name=layer"+(numTabs-1).toString()+"]");
-				addedLayer = document.querySelector(".keyboard-container").appendChild(newLayer.cloneNode(true));
-				addedLayer.setAttribute("name","layer"+(numTabs).toString()+"");
-				addedLayer.classList.add("layer");
-				addedLayer.classList.add("hide");
-				for(row of addedLayer.children){{
-					row.classList.remove("layer-" + (numTabs-1).toString());
-					row.classList.add("layer-" + numTabs.toString());
-				}}
-			}}
-
-			function RemoveLayer(layerNum, tabToRemove){{
-				//Remove the current tab
-				tabToRemove.parentElement.remove();
-				layerToRemove = document.querySelector("[name=layer"+layerNum.toString()+"]");
-				layerToRemove.remove();
-				console.log("layerNum: " + layerNum);
-				for(layer of document.querySelectorAll(".layer")){{
-					//loop thru layer and if 
-					let curLayer = parseInt(layer.getAttribute("name").slice(-1));
-					if(curLayer < layerNum){{ continue;}}
-					layer.setAttribute("name", "layer" + (curLayer-1).toString());
-				}}
-				for(tab of document.querySelectorAll(".tab")){{
-					//loop thru layer and if 
-					let curTab = parseInt(tab.getAttribute("name").slice(-1));
-					
-					if(curTab < layerNum){{ console.log("we dont want to do anythiung here"); continue;}}
-					tab.children[0].setAttribute("onclick", "ChangeTab(" + (curTab-1).toString() + ",this)");
-					tab.children[0].innerHTML = "tab" + (curTab).toString();
-					tab.children[1].setAttribute("onclick", "RemoveLayer(" + (curTab-1).toString() + ",this)");
-					tab.setAttribute("name", "tab" + (curTab-1).toString());
-				}}
-	
-			}}
-		</script>
-	</div>
-	<div class="keyboard-container">
-	{}
+		<div id="layout-editor">
+			{}
+		</div>
+		<div id="wiring-editor" class="hide">
+			
+			{}
+			<div id="wiring-container" class="flex-container">
+				<div id="keyboard-layout">
+					<div class="row">
+						<div class="button wirable">
+						</div>
+						<div class="button wirable">
+						</div>
+						<div class="button wirable">
+						</div>
+					</div>
+					<div class="row">
+						<div class="button wirable">
+						</div>
+						<div class="button wirable">
+						</div>
+						<div class="button wirable">
+						</div>
+					</div>
+					<div class="row">
+						<div class="button wirable">
+						</div>
+						<div class="button wirable">
+						</div>
+						<div class="button wirable">
+						</div>
+					</div>
+				</div>
+				<div id="circuit-layout">
+					<div class="row">
+						<div>
+							<div id="gpio1" class="button gpio" onclick="createWire()"> GPIO 0</div>
+							<select name="row-or-col">
+								<option value="col">Column</option>
+								<option value="row">Row</option>
+							</select>
+						</div>
+						<div>
+							<div id="gpio2" class="button gpio"> GPIO 1</div>
+							<select name="row-or-col">
+								<option value="col">Column</option>
+								<option value="row">Row</option>
+							</select>
+						</div>
+						<div>
+							<div id="gpio3" class="button gpio"> GPIO 2</div>
+							<select name="row-or-col">
+								<option value="col">Column</option>
+								<option value="row">Row</option>
+							</select>
+						</div>
+					</div>	
+				</div>
+				<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" id="wiring-svg">
+				</svg>
+			</div>
+		</div>
 	</div>
 </div>
+<script>
+	function ChangeTab(layer, tabToSelect){{
+		allRows = document.querySelectorAll(".layer");
+		for(row of allRows){{
+			row.classList.add("hide");	
+		}}
+		toMakeVisibile = document.querySelectorAll("[name=layer" + layer.toString() + "]");
+		for(row of toMakeVisibile){{
+			row.classList.remove("hide");
+		}}
+		document.querySelector(".tab-selected").classList.remove("tab-selected");
+		tabToSelect.parentElement.classList.add("tab-selected");
+	}}
+
+	function NewLayer(child){{
+		//Create the new tab
+		let newTab = document.querySelector(".tab");
+		numTabs = document.querySelectorAll(".tab").length;
+		addedTab = document.querySelector(".tab-holder").insertBefore(newTab.cloneNode(true),child.parentElement);
+		addedTab.children[0].setAttribute( "onclick", "ChangeTab(" + numTabs.toString() + ",this)" );
+		addedTab.children[1].setAttribute( "onclick", "RemoveLayer(" + numTabs.toString() + ",this)" );
+		addedTab.children[0].innerHTML = "tab" + (numTabs+1).toString();
+		//Maybe we want to select the newly created tab idk right now
+		addedTab.classList.remove("tab-selected");
+		addedTab.setAttribute("name", "tab" + (numTabs).toString());
+		//Create the new layer
+		let newLayer = document.querySelector("[name=layer"+(numTabs-1).toString()+"]");
+		addedLayer = document.querySelector(".keyboard-container").appendChild(newLayer.cloneNode(true));
+		addedLayer.setAttribute("name","layer"+(numTabs).toString()+"");
+		addedLayer.classList.add("layer");
+		addedLayer.classList.add("hide");
+		for(row of addedLayer.children){{
+			row.classList.remove("layer-" + (numTabs-1).toString());
+			row.classList.add("layer-" + numTabs.toString());
+		}}
+	}}
+
+	function RemoveLayer(layerNum, tabToRemove){{	
+		tabToRemove.parentElement.remove();
+		layerToRemove = document.querySelector("[name=layer"+layerNum.toString()+"]");
+		layerToRemove.remove();
+		console.log("layerNum: " + layerNum);
+		for(layer of document.querySelectorAll(".layer")){{
+			let curLayer = parseInt(layer.getAttribute("name").slice(-1));
+			if(curLayer < layerNum){{ continue;}}
+			layer.setAttribute("name", "layer" + (curLayer-1).toString());
+		}}
+		for(tab of document.querySelectorAll(".tab")){{
+			let curTab = parseInt(tab.getAttribute("name").slice(-1));
+			
+			if(curTab < layerNum){{ console.log("we dont want to do anythiung here"); continue;}}
+			tab.children[0].setAttribute("onclick", "ChangeTab(" + (curTab-1).toString() + ",this)");
+			tab.children[0].innerHTML = "tab" + (curTab).toString();
+			tab.children[1].setAttribute("onclick", "RemoveLayer(" + (curTab-1).toString() + ",this)");
+			tab.setAttribute("name", "tab" + (curTab-1).toString());
+		}}
+	}}
+	function ChangeVerticalTab(toWiring, tabToSelect){{
+		document.querySelector(".vertical-tab-selected").classList.remove(".vertical-tab-selected");
+		tabToSelect.classList.add(".vertical-tab-selected");
+		if(toWiring){{
+			document.querySelector("#layout-editor").classList.add("hide");
+			document.querySelector("#wiring-editor").classList.remove("hide");
+		}} else {{
+			document.querySelector("#wiring-editor").classList.add("hide");
+			document.querySelector("#layout-editor").classList.remove("hide");
+		}}
+	}}
+	function createWire(){{
+		console.log("clicked");
+		svg = document.querySelector("#wiring-svg");
+	}}
+
+	function makeAllWirable(){{
+		ioDivs = document.querySelectorAll(".gpio");
+		for(ioDiv of ioDivs){{
+			makeWireable(ioDiv);
+		}}
+	}}
+	function makeWireable(ioDiv){{
+		let ioLine;
+		ioDiv.addEventListener('mousedown',function (e){{
+			//Findout what happens when I remove this after
+			e.preventDefault();
+			ioLine = CreateLine(ioDiv, e);
+			window.addEventListener('mousemove',dragLine);
+			window.addEventListener('mouseup',dropLine);
+		}});	
+
+		function dragLine(e){{
+			adjustedCoords = getAdjustedCoords(e,document.querySelector("#wiring-svg").getBoundingClientRect());
+			coordString = adjustedCoords.x + "," + adjustedCoords.y;
+			points = ioLine.getAttribute("points").split(" ");
+			points[points.length - 1] = coordString;
+			ioLine.setAttribute("points", points.join(" "));
+		}}
+
+		function dropLine(e){{
+			//console.log(e);
+			try{{
+				if(e.target.getAttribute("class").includes("wirable")){{
+					adjustedCoords = getAdjustedCoords(e.target.getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
+					coordString = adjustedCoords.x + "," + adjustedCoords.y;
+					points = ioLine.getAttribute("points").split(" ");
+					points[points.length - 1] = coordString;
+					ioLine.setAttribute("points", points.join(" "));
+				}} else {{
+					throw Error("not wirable");
+				}}
+			}} catch( error ){{
+					points = ioLine.getAttribute("points").split(" ");
+					points[points.length - 1] = points[points.length - 2];
+					ioLine.setAttribute("points", points.join(" "));
+			}}
+			window.removeEventListener('mousemove', dragLine);
+			window.removeEventListener('mouseup', dropLine);
+		}}
+	}}
+	function CreateLine(ioDiv, e){{
+		const lineId = ioDiv.getAttribute("id")+"line";
+		ioLine = document.querySelector("#" + lineId);
+		if(ioLine == null) {{
+			polyline = document.querySelector("#wiring-svg").appendChild(document.createElementNS('http://www.w3.org/2000/svg',"polyline"));
+			polyline.setAttribute("id",lineId);
+			//TODO set this to colorize either randomly or based on col/row
+			polyline.setAttribute("style", "fill:none;stroke:black;stroke-width:3");
+			coords = getAdjustedCoords(e.target.getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
+			//TODO remove the coord at the end and make logic to either change the last one or add another one
+			polyline.setAttribute("points", coords.x + "," + coords.y + " " + coords.x + "," + coords.y);
+			return polyline;
+		}}
+		return ioLine;
+	}}
+	function getAdjustedCoords(targetDivRect, svgRect){{
+		return{{
+			x: (targetDivRect.x + (targetDivRect.width ?? 0)/2) - svgRect.x,
+			y: (targetDivRect.y + (targetDivRect.height ?? 0)/2) - svgRect.y
+		}};
+	}}
+
+	makeAllWirable();
+</script> 
+
