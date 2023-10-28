@@ -37,16 +37,9 @@
 		<div>
 			
 		</div>
-		<div class="keyboard" hx-get="/keyboard" ) hx-trigger="load">
+		<div class="keyboard" hx-get="/keyboard" hx-trigger="load">
 
 		</div><br>
-		<div hx-get="/keycodes" hx-trigger="load"></div>
-			<datalist id="col_pins">
-				<option>1</option>
-			</datalist>
-			<datalist id="row_pins">
-				<option>1</option>
-			</datalist>
 		<script>
 			function makeConfigRequestJson(){
 			        event.detail.parameters.name = 'test'; 

@@ -26,13 +26,15 @@
 		<div id="layout-editor">
 			{}
 		</div>
-		<div id="wiring-editor" class="hide">
+		<div id="wiring-editor" class="hide" oncontextmenu="return false">
 			
 			{}
 			<div id="wiring-container" class="flex-container">
 				<div id="keyboard-layout">
 					<div class="row">
 						<div class="button wirable">
+							<div class="button"></div>
+							<div class="button"></div>
 						</div>
 						<div class="button wirable">
 						</div>
@@ -109,10 +111,8 @@
 		addedTab.children[0].setAttribute( "onclick", "ChangeTab(" + numTabs.toString() + ",this)" );
 		addedTab.children[1].setAttribute( "onclick", "RemoveLayer(" + numTabs.toString() + ",this)" );
 		addedTab.children[0].innerHTML = "tab" + (numTabs+1).toString();
-		//Maybe we want to select the newly created tab idk right now
 		addedTab.classList.remove("tab-selected");
 		addedTab.setAttribute("name", "tab" + (numTabs).toString());
-		//Create the new layer
 		let newLayer = document.querySelector("[name=layer"+(numTabs-1).toString()+"]");
 		addedLayer = document.querySelector(".keyboard-container").appendChild(newLayer.cloneNode(true));
 		addedLayer.setAttribute("name","layer"+(numTabs).toString()+"");
@@ -169,11 +169,17 @@
 	function makeWireable(ioDiv){{
 		let ioLine;
 		ioDiv.addEventListener('mousedown',function (e){{
-			//Findout what happens when I remove this after
 			e.preventDefault();
-			ioLine = CreateLine(ioDiv, e);
-			window.addEventListener('mousemove',dragLine);
-			window.addEventListener('mouseup',dropLine);
+			if( e.button == 2) {{
+				ioLine = CreateOrGetLine(ioDiv, e, false);
+				window.addEventListener('mousemove',dragEditLine);
+				window.addEventListener('mouseup', dropEditLine);
+			}} else if ( e.button == 0){{
+				ioLine = CreateOrGetLine(ioDiv, e, true);
+				console.log(ioLine);	
+				window.addEventListener('mousemove',dragLine);
+				window.addEventListener('mouseup',dropLine);
+			}}
 		}});	
 
 		function dragLine(e){{
@@ -183,9 +189,16 @@
 			points[points.length - 1] = coordString;
 			ioLine.setAttribute("points", points.join(" "));
 		}}
+		function dragEditLine(e){{
+			index = e.target.getAttribute("lineindex");
+			adjustedCoords = getAdjustedCoords(e,document.querySelector("#wiring-svg").getBoundingClientRect());
+			coordString = adjustedCoords.x + "," + adjustedCoords.y;
+			points = ioLine.getAttribute("points").split(" "));
+			points[index] = coordString;
+			ioLine.setAttribute("points", points.join(" "));
+		}}
 
 		function dropLine(e){{
-			//console.log(e);
 			try{{
 				if(e.target.getAttribute("class").includes("wirable")){{
 					adjustedCoords = getAdjustedCoords(e.target.getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
@@ -193,6 +206,10 @@
 					points = ioLine.getAttribute("points").split(" ");
 					points[points.length - 1] = coordString;
 					ioLine.setAttribute("points", points.join(" "));
+					makeWireable(e.target);
+					e.target.setAttribute("line", ioLine.getAttribute("id").slice(0,-4));
+					e.target.setAttribute("lineindex", ioLine.getAttribute("buttoncount"));
+					ioLine.setAttribute("buttoncount",(parseInt(ioLine.getAttribute("buttoncount")) + 1).toString());
 				}} else {{
 					throw Error("not wirable");
 				}}
@@ -204,19 +221,34 @@
 			window.removeEventListener('mousemove', dragLine);
 			window.removeEventListener('mouseup', dropLine);
 		}}
+		function dropEditLine(e){{
+			window.removeEventListener('mousemove', dragEditLine);
+			window.removeEventListener('mouseup', dropEditLine);
+		}}
 	}}
-	function CreateLine(ioDiv, e){{
-		const lineId = ioDiv.getAttribute("id")+"line";
+	function CreateOrGetLine(ioDiv, e, addpoint){{
+		const lineId = ioDiv.getAttribute("line")+"line";
 		ioLine = document.querySelector("#" + lineId);
-		if(ioLine == null) {{
+		if(ioLine == null) {{ 
+			if (!ioDiv.getAttribute("class").includes("gpio")){{
+				return;
+			}}
 			polyline = document.querySelector("#wiring-svg").appendChild(document.createElementNS('http://www.w3.org/2000/svg',"polyline"));
-			polyline.setAttribute("id",lineId);
-			//TODO set this to colorize either randomly or based on col/row
+			ioDivName = "io" + document.getElementsByTagName("polyline").length;
+			polyline.setAttribute("id",ioDivName + "line");
 			polyline.setAttribute("style", "fill:none;stroke:black;stroke-width:3");
+			polyline.setAttribute("buttoncount","0");
 			coords = getAdjustedCoords(e.target.getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
-			//TODO remove the coord at the end and make logic to either change the last one or add another one
 			polyline.setAttribute("points", coords.x + "," + coords.y + " " + coords.x + "," + coords.y);
+			ioDiv.setAttribute("line",ioDivName);
 			return polyline;
+		}}
+		points = ioLine.getAttribute("points").split(" ");
+		if(points[points.length - 1] == points[points.length - 2]) {{
+			return ioLine;
+		}}
+		if(addpoint){{
+			ioLine.setAttribute("points", points.join(" ") + " " + points[points.length - 1]);
 		}}
 		return ioLine;
 	}}
