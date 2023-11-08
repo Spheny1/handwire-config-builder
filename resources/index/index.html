@@ -3,11 +3,11 @@
 	<head>
 		<script src="https://unpkg.com/htmx.org@1.9.6/dist/htmx.js"></script>
 		<script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
-		<script src="js/main.js"></script>
+		<script src="/main.js"></script>
 		<style>
-		.button { border: 1px solid black; float: left; width: var(--keyheight); border-radius: 5px; margin-right:3px;overflow:hidden;}
+		.button { border: 1px solid black; float: left; width: var(--keyheight); border-radius: 5px; margin-right:3px;overflow:hidden; display:flex; align-items:left;}
 		.1u {width: 48px; height: 48px;}
-		.keyboard{display: flex; border: 2px solid black; padding: 10px; flex-direction: column;}
+		.keyboard{display: inline-flex; border: 2px solid black; padding: 10px; flex-direction: column; margin:auto;}
 		.row { --keyheight: 48px; display:flex; height:var(--keyheight); margin-top: 3px;}
 		.tab-holder {display:flex}
 		.flex-container {display:flex;}
@@ -41,31 +41,6 @@
 		<div class="keyboard" hx-get="/keyboard" hx-trigger="load">
 
 		</div><br>
-		<script>
-			function makeConfigRequestJson(event){
-			        event.detail.parameters.name = 'test'; 
-                		event.detail.parameters.row = ["14","15","16","17","18"];
-                		event.detail.parameters.column = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13'];
-                		event.detail.parameters.orientation = document.getElementById("orientation").value; 
-				event.detail.headers['Content-Type'] = 'application/json';
-				let layout = [];
-				let keys = document.getElementsByClassName("key");
-				event.detail.parameters.id = 0;
-				let layer = [];
-				for( key of keys){
-					//console.log(key);
-					//console.log(key.value);
-					layer.push(key.value);
-					if(layer.length == event.detail.parameters.row.length * event.detail.parameters.column.length){
-						layout.push(layer);
-						while (layer.length > 0) {
-  							layer.pop();
-						}
-					}
-				}		
-				event.detail.parameters.layout = layout;
-			}
-		</script>
 		<div hx-post="/configdownload" hx-trigger="load" id="donwloadconfigbbutton" hx-on="htmx:configRequest: makeConfigRequestJson(event)" hx-ext='json-enc' hx-sync = ".keyboard:queue">
 
 		</div>

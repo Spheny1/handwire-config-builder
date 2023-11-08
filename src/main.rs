@@ -5,6 +5,7 @@ use crate::keyboard::{get_keyboard_by_id, Keyboard, build_keyboard_html};
 use crate::download_config::generate_config_file;
 use std::sync::Arc;
 use serde::{Deserialize};
+use tower_http::{services::{ServeDir}};
 
 mod keyboard;
 mod download_config;
@@ -16,10 +17,12 @@ struct State{
 #[tokio::main]
 async fn main() {
     let state = Arc::new(State{ connection: Connection::open("/home/kyle/Workspace/handwire-config-builder/resources/local.db").await.expect("Couldnt open DB")}); 
-    let app = Router::new().route("/",get(index))
+    let app = Router::new()
+        //.route("/",ServeDir::new("resources/index"))
         .route("/configdownload",post(config_handler))
         .route("/keycodes",get(keycode_handler))
         .route("/keyboard",get(keyboard_handler))
+        .nest_service("/",ServeDir::new("resources/index"))
         .layer(Extension(state));
   //      .route("/keyboard",get(keyboardHandler));
     let listener = SocketAddr::from(([127,0,0,1],3000));
@@ -27,7 +30,7 @@ async fn main() {
 }
 
 async fn index() -> impl IntoResponse {
-       (TypedHeader(ContentType::html()),include_str!("../resources/index.html"),)
+       (TypedHeader(ContentType::html()),include_str!("../resources/index/index.html"),)
 }
 
 async fn config_handler(extract::Json(payload): extract::Json<Keyboard>) -> impl IntoResponse{
