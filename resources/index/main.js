@@ -187,5 +187,7 @@ function getAdjustedCoords(targetDivRect, svgRect){
 		y: (targetDivRect.y + (targetDivRect.height ?? 0)/2) - svgRect.y
 	};
 }
+function updateSvg(element){
 
+}
 

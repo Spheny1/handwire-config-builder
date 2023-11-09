@@ -32,50 +32,66 @@
 				<div id="keyboard-layout">
 					<div class="row">
 						<div class="button wirable">
-							<div class="button"></div>
-							<div class="button"></div>
+							<div class="button row"></div>
+							<div class="button col"></div>
 						</div>
 						<div class="button wirable">
+							<div class="button row"></div>
+							<div class="button col"></div>
 						</div>
 						<div class="button wirable">
-						</div>
-					</div>
-					<div class="row">
-						<div class="button wirable">
-						</div>
-						<div class="button wirable">
-						</div>
-						<div class="button wirable">
+							<div class="button row"></div>
+							<div class="button col"></div>
 						</div>
 					</div>
 					<div class="row">
 						<div class="button wirable">
+							<div class="button row"></div>
+							<div class="button col"></div>
 						</div>
 						<div class="button wirable">
+							<div class="button row"></div>
+							<div class="button col"></div>
 						</div>
 						<div class="button wirable">
+							<div class="button row"></div>
+							<div class="button col"></div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="button wirable">
+							<div class="button row"></div>
+							<div class="button col"></div>
+						</div>
+						<div class="button wirable">
+							<div class="button row"></div>
+							<div class="button col"></div>
+						</div>
+						<div class="button wirable">
+							<div class="button row"></div>
+							<div class="button col"></div>
 						</div>
 					</div>
 				</div>
 				<div id="circuit-layout">
 					<div class="row">
 						<div>
-							<div id="gpio1" class="button gpio" onclick="createWire()"> GPIO 0</div>
-							<select name="row-or-col">
+							<div id="gpio1" class="button gpio"> GPIO 0</div>
+							<select name="row-or-col" onChange="updateSvg(this)">
 								<option value="col">Column</option>
 								<option value="row">Row</option>
 							</select>
 						</div>
 						<div>
 							<div id="gpio2" class="button gpio"> GPIO 1</div>
-							<select name="row-or-col">
+							<select name="row-or-col" onChange="updateSvg(this)">
 								<option value="col">Column</option>
 								<option value="row">Row</option>
 							</select>
 						</div>
 						<div>
 							<div id="gpio3" class="button gpio"> GPIO 2</div>
-							<select name="row-or-col">
+							<select name="row-or-col" onChange="updateSvg(this)">
 								<option value="col">Column</option>
 								<option value="row">Row</option>
 							</select>
