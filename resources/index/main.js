@@ -105,7 +105,6 @@ function makeWireable(ioDiv){
 			window.addEventListener('mouseup', dropEditLine);
 		} else if ( e.button == 0){
 			ioLine = CreateOrGetLine(ioDiv, e, true);
-			console.log(ioLine);	
 			window.addEventListener('mousemove',dragLine);
 			window.addEventListener('mouseup',dropLine);
 		}
@@ -131,6 +130,13 @@ function makeWireable(ioDiv){
 		try{
 			if(e.target.getAttribute("class").includes("wirable")){
 				adjustedCoords = getAdjustedCoords(e.target.getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
+				if(ioLine.getAttribute("isCol") != "true"){
+					adjustedCoords.x -= 10;
+					adjustedCoords.y -= 15;
+				} else {
+					adjustedCoords.x += 10;
+					adjustedCoords.y -= 5;
+				}
 				coordString = adjustedCoords.x + "," + adjustedCoords.y;
 				points = ioLine.getAttribute("points").split(" ");
 				points[points.length - 1] = coordString;
@@ -169,6 +175,7 @@ function CreateOrGetLine(ioDiv, e, addpoint){
 		polyline.setAttribute("buttoncount","0");
 		coords = getAdjustedCoords(e.target.getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
 		polyline.setAttribute("points", coords.x + "," + coords.y + " " + coords.x + "," + coords.y);
+		polyline.setAttribute("isCol", ioDiv.nextElementSibling.value == "col");
 		ioDiv.setAttribute("line",ioDivName);
 		return polyline;
 	}
@@ -187,5 +194,33 @@ function getAdjustedCoords(targetDivRect, svgRect){
 		y: (targetDivRect.y + (targetDivRect.height ?? 0)/2) - svgRect.y
 	};
 }
+function updateSvg(element){
+	ioDiv = element.previousElementSibling;
+	const lineId = ioDiv.getAttribute("line")+"line";
+	ioLine = document.querySelector("#" + lineId);
+	ioLine.setAttribute("isCol", element.value == "col");
+	// loop thru points and update them to be the col/row position
+	points = ioLine.getAttribute("points").split(" ");
+	for (p in points){
+		if(p == 0) {continue;}
+		coords = points[p].split(",");
+		if (element.value == "col"){
+			coords[0] = (parseInt(coords[0])+20).toString();
+			coords[1] = (parseInt(coords[1])+10).toString();
+		} else {
+			coords[0] = (parseInt(coords[0])-20).toString();
+			coords[1] = (parseInt(coords[1])-10).toString();
+		}
+		points[p] = coords.join(",");
+	}
+	ioLine.setAttribute("points", points.join(" "));
+	console.log(ioLine);
 
+}
+function removeLine(element){
+	ioDiv = element.previousElementSibling.previousElementSibling;
+	const lineId = ioDiv.getAttribute("line")+"line";
+	ioLine = document.querySelector("#" + lineId);
+	ioLine.remove();
+}
 
