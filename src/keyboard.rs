@@ -2,6 +2,7 @@ use rusqlite::{params};
 use tokio_rusqlite::{Connection};
 use serde::{Serialize, Deserialize};
 use serde_json::Result;
+use std::collections::HashMap;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Keyboard {
     pub id: i32,
@@ -9,7 +10,8 @@ pub struct Keyboard {
     pub row: Vec<String>,
     pub column: Vec<String>,
     pub orientation: String,
-    pub layout: Vec<Vec<String>>,
+    pub layer: Vec<Vec<String>>,
+    pub layout: HashMap<u32,String>,
 //    img: String,
 }
 
@@ -17,9 +19,11 @@ pub async fn get_keyboard_by_id(conn: &Connection, id: u32) -> Keyboard {
     conn.call(move |conn| {
         let mut stmt = conn.prepare("select * from keyboards WHERE id=?1").unwrap();
         Ok(stmt.query_row(params![id], |row| {
-            let layout_string = row.get::<_,String>(5).unwrap(); 
+            let layer_string = row.get::<_,String>(5).unwrap(); 
             let row_string =  row.get::<_,String>(2).unwrap();
             let col_string =  row.get::<_,String>(3).unwrap();
+            let layout_string: Vec<String> = serde_json::from_str(&row.get::<_,String>(6).unwrap()).unwrap();
+            
             return Ok(
                 Keyboard{
                 id: row.get(0).unwrap(),
@@ -27,7 +31,8 @@ pub async fn get_keyboard_by_id(conn: &Connection, id: u32) -> Keyboard {
                 row: row_string.split(",").map(|s| s.to_string()).collect(),
                 column: col_string.split(",").map(|s| s.to_string()).collect(),
                 orientation: row.get(4).unwrap(),
-                layout: serde_json::from_str(&layout_string).unwrap(),
+                layer: serde_json::from_str(&layer_string).unwrap(),
+                layout: HashMap::new(),
 //                img: row.get(6).unwrap(),
             })
         }).unwrap())
@@ -36,9 +41,9 @@ pub async fn get_keyboard_by_id(conn: &Connection, id: u32) -> Keyboard {
 }
 
 pub fn build_keyboard_html(keyboard: Keyboard) -> String{
-    let mut proto_layout = Vec::new();  
+    let mut proto_layer:Vec<String> = Vec::new();  
     let mut proto_tab = Vec::new();
-    for (index,layer) in keyboard.layout.iter().enumerate(){
+    for (index,layer) in keyboard.layer.iter().enumerate(){
         let mut proto_layer = Vec::new();
         let to_hide = if index == 0 { "".to_string() } else { "hide".to_string() };
         let is_selected = if index == 0 { "tab-selected".to_string() } else { "".to_string() };
@@ -46,8 +51,8 @@ pub fn build_keyboard_html(keyboard: Keyboard) -> String{
         for key_row in layer.chunks(keyboard.column.len()){
             proto_layer.push(format!(include_str!("../resources/row.html"),key_row.iter().map(|key| format!(include_str!("../resources/key-button.html"),key)).collect::<Vec<_>>().join("\n")));
         }
-        proto_layout.push(format!(include_str!("../resources/row-container.html"),index,to_hide,proto_layer.join("\n")));
+        proto_layer.push(format!(include_str!("../resources/row-container.html"),index,to_hide,proto_layer.join("\n")));
     }
-    format!(include_str!("../resources/keyboard.html"),proto_tab.join("\n"), proto_layout.join("\n"),"")
+    format!(include_str!("../resources/keyboard.html"),proto_tab.join("\n"), proto_layer.join("\n"),"")
 
 }

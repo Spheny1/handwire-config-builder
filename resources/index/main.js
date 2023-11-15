@@ -99,15 +99,16 @@ function makeWireable(ioDiv){
 	let ioLine;
 	ioDiv.addEventListener('mousedown',function (e){
 		e.preventDefault();
-		if( e.button == 2) {
-			ioLine = CreateOrGetLine(ioDiv, e, false);
-			window.addEventListener('mousemove',dragEditLine);
-			window.addEventListener('mouseup', dropEditLine);
-		} else if ( e.button == 0){
+	//TODO make a way to edit effectively
+	//	if( e.button == 2) {
+	//		ioLine = CreateOrGetLine(ioDiv, e, false);
+	//		window.addEventListener('mousemove',dragEditLine);
+	//		window.addEventListener('mouseup', dropEditLine);
+	//	} else if ( e.button == 0){
 			ioLine = CreateOrGetLine(ioDiv, e, true);
 			window.addEventListener('mousemove',dragLine);
 			window.addEventListener('mouseup',dropLine);
-		}
+	//	}
 	});	
 
 	function dragLine(e){
@@ -214,8 +215,6 @@ function updateSvg(element){
 		points[p] = coords.join(",");
 	}
 	ioLine.setAttribute("points", points.join(" "));
-	console.log(ioLine);
-
 }
 function removeLine(element){
 	ioDiv = element.previousElementSibling.previousElementSibling;
