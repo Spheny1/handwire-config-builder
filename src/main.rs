@@ -3,12 +3,14 @@ use std::net::SocketAddr;
 use tokio_rusqlite::{Connection};
 use crate::keyboard::{get_keyboard_by_id, Keyboard, build_keyboard_html};
 use crate::download_config::generate_config_file;
+use crate::circuitboard::{get_circuitboard_by_id, Circuitboard, build_circuitboard_html};
 use std::sync::Arc;
 use serde::{Deserialize};
 use tower_http::{services::{ServeDir}};
 
 mod keyboard;
 mod download_config;
+mod circuitboard;
 
 struct State{
     connection: Connection,
@@ -22,6 +24,7 @@ async fn main() {
         .route("/configdownload",post(config_handler))
         .route("/keycodes",get(keycode_handler))
         .route("/keyboard",get(keyboard_handler))
+        .route("/circuitboard",get(circuitboard_handler))
         .nest_service("/",ServeDir::new("resources/index"))
         .layer(Extension(state));
   //      .route("/keyboard",get(keyboardHandler));
@@ -55,6 +58,16 @@ async fn keyboard_handler( connection: Extension<Arc<State>>) -> impl IntoRespon
     //println!("{:?}", keyboard);   
     (TypedHeader(ContentType::html()), build_keyboard_html(keyboard)) 
     
+}
+#[derive(Deserialize)]
+struct CircuitParams{
+    id: u32,
+}
+async fn circuitboard_handler( connection: Extension<Arc<State>>) -> impl IntoResponse{
+    let circuitboard_params: CircuitParams = CircuitParams{id:0};
+    let circuitboard = get_circuitboard_by_id(&connection.connection, circuitboard_params.id).await;
+
+    (TypedHeader(ContentType::html()), build_circuitboard_html(circuitboard))
 }
 //async fn keyboardHandler(Path(params) : Path<Vec<(String,String)>>) -> impl IntoResponse{
   // println!("{}", params[0].0); 

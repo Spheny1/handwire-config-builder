@@ -5,20 +5,24 @@
 		<script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
 		<script src="/main.js"></script>
 		<style>
-		.button { border: 1px solid black; float: left; width: var(--keyheight); border-radius: 5px; margin-right:3px;overflow:hidden; display:flex; align-items:left;}
+		.button { border: 1px solid black; float: left; border-radius: 5px; margin-right:3px;overflow:hidden; display:flex; align-items:left;}
 		.1u {width: 48px; height: 48px;}
 		.keyboard{display: inline-flex; border: 2px solid black; padding: 10px; flex-direction: column; margin:auto;}
 		.row { --keyheight: 48px; display:flex; height:var(--keyheight); margin-top: 3px;}
 		.tab-holder {display:flex}
 		.flex-container {display:flex;}
-		.k1 {height:var(--keyheight)}
-		.k125 {height:calc(var(--keyheight) * 1.25)}
-		.k15 {height:calc(var(--keyheight) * 1.5)}
-		.k2 {height:calc(var(--keyheight) * 2)}
-		.k6 {height:calc(var(--keyheight) * 6)}
-		.k7 {height:calc(var(--keyheight) * 7)}
-		.k225 {height:calc(var(--keyheight) * 2.25)}
-		.k25 {height:calc(var(--keyheight) * 2.5)}
+		.k1 {height:var(--keyheight); width: calc(var(--keyheight) * 1)}
+		.k125 {height:var(--keyheight); width: calc(var(--keyheight) * 1.25)}
+		.k15 {height:var(--keyheight); width: calc(var(--keyheight) * 1.5)}
+		.k2 {height:var(--keyheight); width: calc(var(--keyheight) * 2)}
+		.k225 {height:var(--keyheight); width: calc(var(--keyheight) * 2.25)}
+		.k6 {height:var(--keyheight); width: calc(var(--keyheight) * 6)}
+		.k625 {height:var(--keyheight); width: calc(var(--keyheight) * 6.25)}
+		.k7 {height:var(--keyheight); width: calc(var(--keyheight) * 7)}
+		.k25 {height:var(--keyheight); width: calc(var(--keyheight) * 2.5)}
+		.k275 {height:var(--keyheight); width: calc(var(--keyheight) * 2.75)}
+		.k175 {height:var(--keyheight); width: calc(var(--keyheight) * 1.75)}
+		.k0 {height:var(--keyheight); width: 0; display:none;}
 		.hide {display:none;}
 		.show {display:inline;}
 		.key {background-color:transparent; border:0;box-sizing:border-box;text-align-center;}
