@@ -12,6 +12,7 @@ pub struct Keyboard {
     pub orientation: String,
     pub layer: Vec<Vec<String>>,
     pub layout: HashMap<u8,String>,
+    pub default_circuit_id: u32,
 //    img: String,
 }
 
@@ -34,14 +35,15 @@ pub async fn get_keyboard_by_id(conn: &Connection, id: u32) -> Keyboard {
                 orientation: row.get(4).unwrap(),
                 layer: serde_json::from_str(&layer_string).unwrap(),
                 layout: layout_hashmap,
+                default_circuit_id: row.get(7).unwrap(),
 //                img: row.get(6).unwrap(),
             })
         }).unwrap())
     }).await.unwrap()
     
 }
-//TODO handle kc0
-pub fn build_keyboard_html(keyboard: Keyboard) -> String{
+//TODO handle kc0row
+pub fn build_keyboard_html(keyboard: Keyboard, circuitboard_html: String) -> String{
     let mut proto_layers:Vec<String> = Vec::new();  
     let mut proto_tab = Vec::new();
     let mut proto_wiring = Vec::new();
@@ -59,8 +61,9 @@ pub fn build_keyboard_html(keyboard: Keyboard) -> String{
     let mut wiring_index:u8 = 0;
     for key_row_wiring in keyboard.layer[0].chunks(keyboard.column.len()){
         //TODO refactor so this uses the same file key0button.html as above
+        //QUESTION do we want to reflect the keyboard for the wiring?
         proto_wiring.push(format!(include_str!("../resources/row.html"),key_row_wiring.iter().map(|key|{wiring_index +=1; format!(include_str!("../resources/key-button-wirable.html"),keyboard.layout.get(&(wiring_index-1)).unwrap_or(&"1".to_string()))}).collect::<Vec<_>>().join("\n")));
     }
-    format!(include_str!("../resources/keyboard.html"),proto_tab.join("\n"), proto_layers.join("\n"),proto_wiring.join("\n"))
+    format!(include_str!("../resources/keyboard.html"),proto_tab.join("\n"), proto_layers.join("\n"),proto_wiring.join("\n"), circuitboard_html)
 
 }

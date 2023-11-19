@@ -52,11 +52,13 @@ async fn keycode_handler() -> impl IntoResponse{
 struct KeyboardParams{
     id: u32,
 }
+//TODO figure out if I need to refactor this
 async fn keyboard_handler( connection: Extension<Arc<State>>) -> impl IntoResponse{
     let keyboard_params: KeyboardParams = KeyboardParams{id:0};
     let keyboard = get_keyboard_by_id(&connection.connection, keyboard_params.id).await;
+    let circuitboard_html = build_circuitboard_html(get_circuitboard_by_id(&connection.connection, keyboard.default_circuit_id).await);
     //println!("{:?}", keyboard);   
-    (TypedHeader(ContentType::html()), build_keyboard_html(keyboard)) 
+    (TypedHeader(ContentType::html()), build_keyboard_html(keyboard, circuitboard_html)) 
     
 }
 #[derive(Deserialize)]

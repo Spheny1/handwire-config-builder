@@ -17,7 +17,8 @@ function makeConfigRequestJson(event){
 			}
 		}
 	}		
-	event.detail.parameters.layout = layout;
+	event.detail.parameters.layer = layout;
+	event.detail.parameters.layout = "{}";
 }
 function ChangeTab(layer, tabToSelect){
 	allRows = document.querySelectorAll(".layer");
@@ -217,7 +218,7 @@ function updateSvg(element){
 	ioLine.setAttribute("points", points.join(" "));
 }
 function removeLine(element){
-	ioDiv = element.previousElementSibling.previousElementSibling;
+	ioDiv = element.previousElementSibling.previousElementSibling.previousElementSibling;
 	const lineId = ioDiv.getAttribute("line")+"line";
 	ioLine = document.querySelector("#" + lineId);
 	ioLine.remove();

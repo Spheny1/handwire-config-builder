@@ -9,6 +9,7 @@
 		.1u {width: 48px; height: 48px;}
 		.keyboard{display: inline-flex; border: 2px solid black; padding: 10px; flex-direction: column; margin:auto;}
 		.row { --keyheight: 48px; display:flex; height:var(--keyheight); margin-top: 3px;}
+		.col {display: flex; flex-direction: column; width: 200px;}
 		.tab-holder {display:flex}
 		.flex-container {display:flex;}
 		.k1 {height:var(--keyheight); width: calc(var(--keyheight) * 1)}
@@ -35,6 +36,8 @@
 		.vertical-tab {writing-mode:vertical-lr; text-orientation: upright;}
 		.vertical-tab-selected { background-color: #D3D3D3; }
 		#wiring-svg{pointer-events: none; position: absolute;}
+		.gpio {padding:10px;}
+		.gpio-text {margin:0px}
 		</style>
 	</head>
 	<body>
