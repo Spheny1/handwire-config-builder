@@ -197,7 +197,7 @@ function getAdjustedCoords(targetDivRect, svgRect){
 	};
 }
 function updateSvg(element){
-	ioDiv = element.previousElementSibling;
+	ioDiv = element.previousElementSibling.previousElementSibling;
 	const lineId = ioDiv.getAttribute("line")+"line";
 	ioLine = document.querySelector("#" + lineId);
 	ioLine.setAttribute("isCol", element.value == "col");

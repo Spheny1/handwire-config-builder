@@ -9,23 +9,23 @@
 	</div>
 	
 	<div id="keyboard-container" class="keyboard-container">
-		<div>
+		<div id="layout-editor">
+			<div>
+				<div name="tab-holder" class="tab-holder">
+					{}
+					<div class = "tab-new">
+						<button class="tab-button" onclick="NewLayer(this)"> + </button>
+					</div>
+				</div>
+			</div>
+			{}
+		</div>
+		<div id="wiring-editor" class="hide" oncontextmenu="return false">
 			<label for="orientation">Orientation:</label>
 			<select name="orientation" id="orientation">
 				<option value="COL2ROW">Col2Row</option>
 				<option value="ROW_2COL">Row2Col</option>
 			</select>
-			<div name="tab-holder" class="tab-holder">
-				{}
-				<div class = "tab-new">
-					<button class="tab-button" onclick="NewLayer(this)"> + </button>
-				</div>
-			</div>
-		</div>
-		<div id="layout-editor">
-			{}
-		</div>
-		<div id="wiring-editor" class="hide" oncontextmenu="return false">
 			<div id="wiring-container" class="flex-container">
 				<div id="keyboard-layout">
 					{}
