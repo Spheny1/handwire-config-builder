@@ -18,7 +18,8 @@ function makeConfigRequestJson(event){
 		}
 	}		
 	event.detail.parameters.layer = layout;
-	event.detail.parameters.layout = "{}";
+	event.detail.parameters.layout = {};
+	event.detail.parameters.default_circuit_id = 0;
 }
 function ChangeTab(layer, tabToSelect){
 	allRows = document.querySelectorAll(".layer");
@@ -235,7 +236,9 @@ function removeLine(element){
 
 function getColor(lineId){
 	hValue = parseInt(lineId.slice(2)) * 30;
-	
 	color = "hsl(" + hValue.toString() + ", 70%, 50%)"
 	return color; 
+}
+function getElementFromSvgPoint(x, y, svgRect){
+	return getElementsFromPoint(x+svgRect.x,y+svgRect,y);
 }
