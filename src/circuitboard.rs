@@ -29,7 +29,6 @@ pub async fn get_circuitboard_by_id(conn: &Connection, id: u32) -> Circuitboard 
 //TODO it has a bracket on the first and last element
 pub fn build_circuitboard_html(circuitboard: Circuitboard) -> String{
     let mut proto_circuit_gpio = Vec::new();
-    println!("{:?}", circuitboard.ports);
     for(index, gpio) in circuitboard.ports.iter().enumerate(){
         proto_circuit_gpio.push(format!(include_str!("../resources/circuit-row.html"), index.to_string(), gpio));
     }

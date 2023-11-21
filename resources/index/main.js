@@ -74,13 +74,22 @@ function RemoveLayer(layerNum, tabToRemove){
 		tab.setAttribute("name", "tab" + (curTab-1).toString());
 	}
 }
-function ChangeVerticalTab(toWiring, tabToSelect){
+function ChangeVerticalTab(toLayer, tabToSelect){
 	document.querySelector(".vertical-tab-selected").classList.remove(".vertical-tab-selected");
 	tabToSelect.classList.add(".vertical-tab-selected");
-	if(toWiring){
+	if(toLayer == 0){
+		console.log("to keymap");
+		document.querySelector("#keymap-editor").classList.remove("hide");
+		document.querySelector("#wiring-editor").classList.add("hide");
 		document.querySelector("#layout-editor").classList.add("hide");
+	} else if(toLayer == 1){
+		console.log("to wiring");
+		document.querySelector("#keymap-editor").classList.add("hide");
 		document.querySelector("#wiring-editor").classList.remove("hide");
+		document.querySelector("#layout-editor").classList.add("hide");
 	} else {
+		console.log("to layout");
+		document.querySelector("#keymap-editor").classList.add("hide");
 		document.querySelector("#wiring-editor").classList.add("hide");
 		document.querySelector("#layout-editor").classList.remove("hide");
 	}
@@ -132,7 +141,7 @@ function makeWireable(ioDiv){
 		try{
 			if(e.target.getAttribute("class").includes("wirable")){
 				adjustedCoords = getAdjustedCoords(e.target.getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
-				if(ioLine.getAttribute("isCol") != "true"){
+				if(ioLine.getAttribute("isCol") == "true"){
 					adjustedCoords.x -= 10;
 					adjustedCoords.y -= 15;
 				} else {
@@ -173,7 +182,7 @@ function CreateOrGetLine(ioDiv, e, addpoint){
 		polyline = document.querySelector("#wiring-svg").appendChild(document.createElementNS('http://www.w3.org/2000/svg',"polyline"));
 		ioDivName = "io" + document.getElementsByTagName("polyline").length;
 		polyline.setAttribute("id",ioDivName + "line");
-		polyline.setAttribute("style", "fill:none;stroke:black;stroke-width:3");
+		polyline.setAttribute("style", "fill:none;stroke-width:3;stroke:" + getColor(ioDivName));
 		polyline.setAttribute("buttoncount","0");
 		coords = getAdjustedCoords(e.target.getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
 		polyline.setAttribute("points", coords.x + "," + coords.y + " " + coords.x + "," + coords.y);
@@ -224,3 +233,9 @@ function removeLine(element){
 	ioLine.remove();
 }
 
+function getColor(lineId){
+	hValue = parseInt(lineId.slice(2)) * 30;
+	
+	color = "hsl(" + hValue.toString() + ", 70%, 50%)"
+	return color; 
+}

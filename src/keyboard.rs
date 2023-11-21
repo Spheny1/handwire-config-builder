@@ -64,6 +64,6 @@ pub fn build_keyboard_html(keyboard: Keyboard, circuitboard_html: String) -> Str
         //QUESTION do we want to reflect the keyboard for the wiring?
         proto_wiring.push(format!(include_str!("../resources/row.html"),key_row_wiring.iter().map(|key|{wiring_index +=1; format!(include_str!("../resources/key-button-wirable.html"),keyboard.layout.get(&(wiring_index-1)).unwrap_or(&"1".to_string()))}).collect::<Vec<_>>().join("\n")));
     }
-    format!(include_str!("../resources/keyboard.html"),proto_tab.join("\n"), proto_layers.join("\n"),proto_wiring.join("\n"), circuitboard_html)
+    format!(include_str!("../resources/keyboard.html"),proto_tab.join("\n"), proto_layers.join("\n"),proto_wiring.join("\n"), circuitboard_html,"wiring","layout-editor here")
 
 }

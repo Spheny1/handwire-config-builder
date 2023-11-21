@@ -1,15 +1,19 @@
 <div class="flex-container">
 	<div class="vertical-flex">
-		<div id="layout-tab" class="vertical-tab vertical-tab-selected">
-			<button class="tab-button" onclick="ChangeVerticalTab(false,this)">Layout</button>
+		<div name="layout-tab" class="vertical-tab vertical-tab-selected">
+			<button class="tab-button" onclick="ChangeVerticalTab(0,this)">Keymap</button>
 		</div>
-		<div id="wiring-tab" class="vertical-tab">
-			<button class="tab-button" onclick="ChangeVerticalTab(true,this)">Wiring</button>
+		<div name="wiring-tab" class="vertical-tab">
+			<button class="tab-button" onclick="ChangeVerticalTab(1,this)">Wiring</button>
 		</div>
+		<div name="wiring-tab" class="vertical-tab">
+			<button class="tab-button" onclick="ChangeVerticalTab(2,this)">Layout</button>
+		</div>
+		
 	</div>
 	
 	<div id="keyboard-container" class="keyboard-container">
-		<div id="layout-editor">
+		<div id="keymap-editor">
 			<div>
 				<div name="tab-holder" class="tab-holder">
 					{}
@@ -34,8 +38,12 @@
 					{}
 				</div>
 				<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" id="wiring-svg">
+					{}
 				</svg>
 			</div>
+		</div>
+		<div id="layout-editor" class="hide">
+			{}
 		</div>
 	</div>
 </div>
