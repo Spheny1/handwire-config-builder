@@ -1,25 +1,45 @@
 function makeConfigRequestJson(event){
-        event.detail.parameters.name = 'test'; 
-    	event.detail.parameters.row = ["14","15","16","17","18"];
-        event.detail.parameters.column = ['0','1','2','3','4','5','6','7','8','9','10','11','12','13'];
+        event.detail.parameters.name = 'test';
+	rowArray = [];
+	colArray = [];
+	//Loop thru gpio elements push the proper col/row arrays
+	for(gpio of document.querySelectorAll(".gpio")){
+		if(gpio.nextElementSibling.nextElementSibling.value == "col"){
+			rowArray.push(gpio.nextElementSibling.innerHTML);
+		} else {
+			colArray.push(gpio.nextElementSibling.innerHTML);
+		}
+	}
         event.detail.parameters.orientation = document.getElementById("orientation").value; 
 	event.detail.headers['Content-Type'] = 'application/json';
 	let layout = [];
 	let keys = document.getElementsByClassName("key");
 	event.detail.parameters.id = 0;
 	let layer = [];
-	for( key of keys){
-		layer.push(key.value);
-		if(layer.length == event.detail.parameters.row.length * event.detail.parameters.column.length){
-			layout.push(layer);
-			while (layer.length > 0) {
-  				layer.pop();
-			}
-		}
-	}		
+	
+	for(i in rowArray){
+		// get ioline
+		//
+		//Loop thru points and get key div at each
+		//
+	}
+
+	//assign outer loop based on row-col and build the layers
+	//for( key of keys){
+	//	layer.push(key.value);
+	//	if(layer.length == event.detail.parameters.row.length * event.detail.parameters.column.length){
+	//		layout.push(layer);
+	//		while (layer.length > 0) {
+  	//			layer.pop();
+	//		}
+	//	}
+	//}		
 	event.detail.parameters.layer = layout;
 	event.detail.parameters.layout = {};
 	event.detail.parameters.default_circuit_id = 0;
+	event.detail.parameters.row = rowArray;
+        event.detail.parameters.column = colArray;
+
 }
 function ChangeTab(layer, tabToSelect){
 	allRows = document.querySelectorAll(".layer");
@@ -142,13 +162,8 @@ function makeWireable(ioDiv){
 		try{
 			if(e.target.getAttribute("class").includes("wirable")){
 				adjustedCoords = getAdjustedCoords(e.target.getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
-				if(ioLine.getAttribute("isCol") == "true"){
-					adjustedCoords.x -= 10;
-					adjustedCoords.y -= 15;
-				} else {
-					adjustedCoords.x += 10;
-					adjustedCoords.y -= 5;
-				}
+				adjustedCoords = ColOrRowPos(adjustedCoords,ioLine.getAttribute("isCol") == "true");
+				console.log(adjustedCoords);
 				coordString = adjustedCoords.x + "," + adjustedCoords.y;
 				points = ioLine.getAttribute("points").split(" ");
 				points[points.length - 1] = coordString;
@@ -173,6 +188,16 @@ function makeWireable(ioDiv){
 		window.removeEventListener('mouseup', dropEditLine);
 	}
 }
+function ColOrRowPos(divCoords, isCol){
+	if(isCol){
+		divCoords.x -= 10;
+		divCoords.y -= 15;
+	} else {
+		divCoords.x += 10;
+		divCoords.y -= 5;
+	}	
+	return divCoords;
+}
 function CreateOrGetLine(ioDiv, e, addpoint){
 	const lineId = ioDiv.getAttribute("line")+"line";
 	ioLine = document.querySelector("#" + lineId);
@@ -187,7 +212,8 @@ function CreateOrGetLine(ioDiv, e, addpoint){
 		polyline.setAttribute("buttoncount","0");
 		coords = getAdjustedCoords(e.target.getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
 		polyline.setAttribute("points", coords.x + "," + coords.y + " " + coords.x + "," + coords.y);
-		polyline.setAttribute("isCol", ioDiv.nextElementSibling.value == "col");
+		polyline.setAttribute("isCol", ioDiv.nextElementSibling.nextElementSibling.value == "col");
+		console.log(polyline);
 		ioDiv.setAttribute("line",ioDivName);
 		return polyline;
 	}
@@ -213,17 +239,15 @@ function updateSvg(element){
 	ioLine.setAttribute("isCol", element.value == "col");
 	// loop thru points and update them to be the col/row position
 	points = ioLine.getAttribute("points").split(" ");
+	
 	for (p in points){
 		if(p == 0) {continue;}
 		coords = points[p].split(",");
-		if (element.value == "col"){
-			coords[0] = (parseInt(coords[0])+20).toString();
-			coords[1] = (parseInt(coords[1])+10).toString();
-		} else {
-			coords[0] = (parseInt(coords[0])-20).toString();
-			coords[1] = (parseInt(coords[1])-10).toString();
-		}
-		points[p] = coords.join(",");
+		button = getElementFromSvgPoint( parseInt(coords[0]),parseInt(coords[1]), document.querySelector("#wiring-svg").getBoundingClientRect())
+		adjustedCoords = getAdjustedCoords(button.getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
+		adjustedCoords = ColOrRowPos(adjustedCoords,ioLine.getAttribute("isCol") == "true");
+
+		points[p] = adjustedCoords.x.toString() + "," + adjustedCoords.y.toString();
 	}
 	ioLine.setAttribute("points", points.join(" "));
 }
@@ -240,5 +264,5 @@ function getColor(lineId){
 	return color; 
 }
 function getElementFromSvgPoint(x, y, svgRect){
-	return getElementsFromPoint(x+svgRect.x,y+svgRect,y);
+	return document.elementFromPoint(x+svgRect.x,y+svgRect.y);
 }

@@ -1,2 +1,4 @@
 <a href={} download="code.py"> Download Config </a>
-
+<div class='btn' hx-trigger="click" hx-post="/configdownload" hx-swap="outerHTML" hx-on="htmx:configRequest: makeConfigRequestJson(event)" hx-ext='json-enc'>
+	Reload Config
+</div>

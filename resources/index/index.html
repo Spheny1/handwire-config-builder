@@ -48,8 +48,10 @@
 		<div class="keyboard" hx-get="/keyboard" hx-trigger="load">
 
 		</div><br>
-		<div hx-post="/configdownload" hx-trigger="load" id="donwloadconfigbbutton" hx-on="htmx:configRequest: makeConfigRequestJson(event)" hx-ext='json-enc' hx-sync = ".keyboard:queue">
-
+		<div id="config-div">
+			<div class='btn' hx-trigger="click" hx-post="/configdownload" hx-swap="outerHTML" hx-on="htmx:configRequest: makeConfigRequestJson(event)" hx-ext='json-enc'>
+				Load Config
+			</div>
 		</div>
 	</body>
 
