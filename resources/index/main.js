@@ -128,7 +128,10 @@ function makeAllWirable(){
 }
 function makeWireable(ioDiv){
 	let ioLine;
-	ioDiv.addEventListener('mousedown',startLine)
+	console.log("makeWirable");
+	console.log(ioDiv);
+	ioDiv.addEventListener('mousedown',startLine);
+	ioDiv.addEventListener('dropWirableEvent', dropWirable);
 	function startLine(e){
 		e.preventDefault();
 	//TODO make a way to edit effectively
@@ -141,7 +144,7 @@ function makeWireable(ioDiv){
 			window.addEventListener('mousemove',dragLine);
 			window.addEventListener('mouseup',dropLine);
 			console.log("adding dropwirable Event");
-			ioDiv.addEventListener('dropWirableEvent', dropWirable)
+			console.log(ioDiv);
 	//	}
 	}
 	function dragLine(e){
@@ -200,14 +203,13 @@ function makeWireable(ioDiv){
 		console.log(ioDiv);
 		//Why does the circuit board points get included in this? it is omitted from the loop calling the event and it does not seem to be added ever?
 			//
-		//ioDiv.removeEventListener('dropWirableEvent',dropWirable);
-		//e.target.removeEventListener('dropWirableEvent',dropWirable);
+		ioDiv.removeEventListener('dropWirableEvent',dropWirable);
+		e.target.removeEventListener('dropWirableEvent',dropWirable);
 		if ((ioDiv.getAttribute("id") ?? "").includes("gpio")){
 			return;
 		}
-		//ioDiv.removeEventListener('mousedown',startLine);
-		//e.target.removeEventListener('dropWirableEvent',dropWirable);
-		//e.target.removeEventListener('mousedown',startLine);
+		ioDiv.removeEventListener('mousedown',startLine);
+		e.target.removeEventListener('mousedown',startLine);
 	}
 }
 function ColOrRowPos(divCoords, isCol){
