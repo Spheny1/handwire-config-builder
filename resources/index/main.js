@@ -99,17 +99,17 @@ function ChangeVerticalTab(toLayer, tabToSelect){
 	document.querySelector(".vertical-tab-selected").classList.remove(".vertical-tab-selected");
 	tabToSelect.classList.add(".vertical-tab-selected");
 	if(toLayer == 0){
-		console.log("to keymap");
+		//console.log("to keymap");
 		document.querySelector("#keymap-editor").classList.remove("hide");
 		document.querySelector("#wiring-editor").classList.add("hide");
 		document.querySelector("#layout-editor").classList.add("hide");
 	} else if(toLayer == 1){
-		console.log("to wiring");
+		//console.log("to wiring");
 		document.querySelector("#keymap-editor").classList.add("hide");
 		document.querySelector("#wiring-editor").classList.remove("hide");
 		document.querySelector("#layout-editor").classList.add("hide");
 	} else {
-		console.log("to layout");
+		//console.log("to layout");
 		document.querySelector("#keymap-editor").classList.add("hide");
 		document.querySelector("#wiring-editor").classList.add("hide");
 		document.querySelector("#layout-editor").classList.remove("hide");
@@ -128,7 +128,8 @@ function makeAllWirable(){
 }
 function makeWireable(ioDiv){
 	let ioLine;
-	ioDiv.addEventListener('mousedown',function (e){
+	ioDiv.addEventListener('mousedown',startLine)
+	function startLine(e){
 		e.preventDefault();
 	//TODO make a way to edit effectively
 	//	if( e.button == 2) {
@@ -139,9 +140,10 @@ function makeWireable(ioDiv){
 			ioLine = CreateOrGetLine(ioDiv, e, true);
 			window.addEventListener('mousemove',dragLine);
 			window.addEventListener('mouseup',dropLine);
+			console.log("adding dropwirable Event");
+			ioDiv.addEventListener('dropWirableEvent', dropWirable)
 	//	}
-	});	
-
+	}
 	function dragLine(e){
 		adjustedCoords = getAdjustedCoords(e,document.querySelector("#wiring-svg").getBoundingClientRect());
 		coordString = adjustedCoords.x + "," + adjustedCoords.y;
@@ -163,15 +165,18 @@ function makeWireable(ioDiv){
 			if(e.target.getAttribute("class").includes("wirable")){
 				adjustedCoords = getAdjustedCoords(e.target.getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
 				adjustedCoords = ColOrRowPos(adjustedCoords,ioLine.getAttribute("isCol") == "true");
-				console.log(adjustedCoords);
+				//console.log(adjustedCoords);
 				coordString = adjustedCoords.x + "," + adjustedCoords.y;
 				points = ioLine.getAttribute("points").split(" ");
 				points[points.length - 1] = coordString;
 				ioLine.setAttribute("points", points.join(" "));
 				makeWireable(e.target);
-				e.target.setAttribute("line", ioLine.getAttribute("id").slice(0,-4));
+				rowOrCol = "";//ioLine.getAttribute("isCol") == true ? "col" : "row";
+				e.target.setAttribute("line" + rowOrCol, ioLine.getAttribute("id").slice(0,-4));
 				e.target.setAttribute("lineindex", ioLine.getAttribute("buttoncount"));
 				ioLine.setAttribute("buttoncount",(parseInt(ioLine.getAttribute("buttoncount")) + 1).toString());
+				
+				e.target.addEventListener('dropWirableEvent', dropWirable);
 			} else {
 				throw Error("not wirable");
 			}
@@ -182,10 +187,27 @@ function makeWireable(ioDiv){
 		}
 		window.removeEventListener('mousemove', dragLine);
 		window.removeEventListener('mouseup', dropLine);
+
 	}
 	function dropEditLine(e){
 		window.removeEventListener('mousemove', dragEditLine);
 		window.removeEventListener('mouseup', dropEditLine);
+		console.log(ioDiv);
+	}
+	function dropWirable(e){
+		console.log(e);
+		console.log(e.target);
+		console.log(ioDiv);
+		//Why does the circuit board points get included in this? it is omitted from the loop calling the event and it does not seem to be added ever?
+			//
+		//ioDiv.removeEventListener('dropWirableEvent',dropWirable);
+		//e.target.removeEventListener('dropWirableEvent',dropWirable);
+		if ((ioDiv.getAttribute("id") ?? "").includes("gpio")){
+			return;
+		}
+		//ioDiv.removeEventListener('mousedown',startLine);
+		//e.target.removeEventListener('dropWirableEvent',dropWirable);
+		//e.target.removeEventListener('mousedown',startLine);
 	}
 }
 function ColOrRowPos(divCoords, isCol){
@@ -206,14 +228,14 @@ function CreateOrGetLine(ioDiv, e, addpoint){
 			return;
 		}
 		polyline = document.querySelector("#wiring-svg").appendChild(document.createElementNS('http://www.w3.org/2000/svg',"polyline"));
-		ioDivName = "io" + document.getElementsByTagName("polyline").length;
+		ioDivName = "io" + ioDiv.getAttribute("id").slice(4);
 		polyline.setAttribute("id",ioDivName + "line");
 		polyline.setAttribute("style", "fill:none;stroke-width:3;stroke:" + getColor(ioDivName));
 		polyline.setAttribute("buttoncount","0");
 		coords = getAdjustedCoords(e.target.getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
 		polyline.setAttribute("points", coords.x + "," + coords.y + " " + coords.x + "," + coords.y);
 		polyline.setAttribute("isCol", ioDiv.nextElementSibling.nextElementSibling.value == "col");
-		console.log(polyline);
+		//console.log(polyline);
 		ioDiv.setAttribute("line",ioDivName);
 		return polyline;
 	}
@@ -255,7 +277,24 @@ function removeLine(element){
 	ioDiv = element.previousElementSibling.previousElementSibling.previousElementSibling;
 	const lineId = ioDiv.getAttribute("line")+"line";
 	ioLine = document.querySelector("#" + lineId);
+	//Loop thru the line and get each key and drop this as a line
+	points = ioLine.getAttribute("points").split(" ");
+	console.log("below are the points");
+	console.log(points);
+	//This loop might be unecessary
+	for (p in points){
+		if(p == 0) {continue;}
+		coords = points[p].split(",");
+		console.log("In loop");
+		button = getElementFromSvgPoint( parseInt(coords[0]),parseInt(coords[1]), document.querySelector("#wiring-svg").getBoundingClientRect());
+		//console.log(button);
+		console.log(button);
+		console.log("dispatch event");
+		button.dispatchEvent(dropWirableEvent);
+	}
 	ioLine.remove();
+	ioDiv.removeAttribute("line")
+
 }
 
 function getColor(lineId){
@@ -266,3 +305,9 @@ function getColor(lineId){
 function getElementFromSvgPoint(x, y, svgRect){
 	return document.elementFromPoint(x+svgRect.x,y+svgRect.y);
 }
+
+const dropWirableEvent = new Event('dropWirableEvent', {
+	bubbles: true,
+	cancelable: true,
+	composed: false
+});
