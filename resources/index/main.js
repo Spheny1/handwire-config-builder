@@ -128,8 +128,6 @@ function makeAllWirable(){
 }
 function makeWireable(ioDiv){
 	let ioLine;
-	console.log("makeWirable");
-	console.log(ioDiv);
 	ioDiv.addEventListener('mousedown',startLine);
 	ioDiv.addEventListener('dropWirableEvent', dropWirable);
 	function startLine(e){
@@ -143,8 +141,6 @@ function makeWireable(ioDiv){
 			ioLine = CreateOrGetLine(ioDiv, e, true);
 			window.addEventListener('mousemove',dragLine);
 			window.addEventListener('mouseup',dropLine);
-			console.log("adding dropwirable Event");
-			console.log(ioDiv);
 	//	}
 	}
 	function dragLine(e){
@@ -198,17 +194,9 @@ function makeWireable(ioDiv){
 		console.log(ioDiv);
 	}
 	function dropWirable(e){
-		console.log(e);
-		console.log(e.target);
-		console.log(ioDiv);
-		//Why does the circuit board points get included in this? it is omitted from the loop calling the event and it does not seem to be added ever?
-			//
-		ioDiv.removeEventListener('dropWirableEvent',dropWirable);
+		//Why cant I do below?
+		//e.target.dispatchEvent(dropWirableEvent);
 		e.target.removeEventListener('dropWirableEvent',dropWirable);
-		if ((ioDiv.getAttribute("id") ?? "").includes("gpio")){
-			return;
-		}
-		ioDiv.removeEventListener('mousedown',startLine);
 		e.target.removeEventListener('mousedown',startLine);
 	}
 }
@@ -281,18 +269,14 @@ function removeLine(element){
 	ioLine = document.querySelector("#" + lineId);
 	//Loop thru the line and get each key and drop this as a line
 	points = ioLine.getAttribute("points").split(" ");
-	console.log("below are the points");
-	console.log(points);
 	//This loop might be unecessary
 	for (p in points){
 		if(p == 0) {continue;}
 		coords = points[p].split(",");
-		console.log("In loop");
 		button = getElementFromSvgPoint( parseInt(coords[0]),parseInt(coords[1]), document.querySelector("#wiring-svg").getBoundingClientRect());
 		//console.log(button);
-		console.log(button);
-		console.log("dispatch event");
 		button.dispatchEvent(dropWirableEvent);
+		//return;
 	}
 	ioLine.remove();
 	ioDiv.removeAttribute("line")
