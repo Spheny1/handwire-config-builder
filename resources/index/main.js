@@ -79,7 +79,6 @@ function RemoveLayer(layerNum, tabToRemove){
 	tabToRemove.parentElement.remove();
 	layerToRemove = document.querySelector("[name=layer"+layerNum.toString()+"]");
 	layerToRemove.remove();
-	console.log("layerNum: " + layerNum);
 	for(layer of document.querySelectorAll(".layer")){
 		let curLayer = parseInt(layer.getAttribute("name").slice(-1));
 		if(curLayer < layerNum){ continue;}
@@ -170,11 +169,10 @@ function makeWireable(ioDiv){
 				points[points.length - 1] = coordString;
 				ioLine.setAttribute("points", points.join(" "));
 				makeWireable(e.target);
-				rowOrCol = "";//ioLine.getAttribute("isCol") == true ? "col" : "row";
-				e.target.setAttribute("line" + rowOrCol, ioLine.getAttribute("id").slice(0,-4));
+				e.target.setAttribute("line", ioLine.getAttribute("id").slice(0,-4));
 				e.target.setAttribute("lineindex", ioLine.getAttribute("buttoncount"));
 				ioLine.setAttribute("buttoncount",(parseInt(ioLine.getAttribute("buttoncount")) + 1).toString());
-				
+				ioDiv.removeEventListener('mousedown',startLine);	
 				e.target.addEventListener('dropWirableEvent', dropWirable);
 			} else {
 				throw Error("not wirable");
@@ -193,12 +191,31 @@ function makeWireable(ioDiv){
 		window.removeEventListener('mouseup', dropEditLine);
 		console.log(ioDiv);
 	}
+	function hover(e){
+		line = document.querySelector("#" + e.target.getAttribute("line") + "line");
+	//	if(line.getAttribute("isCol") == "true"){
+	//		if(e.layerX > 25){
+	//			return;
+	//		}
+	//	} else {
+	//		if(e.layerX <= 25){
+	//			return;
+	//		}
+	//	}
+		e.target.style.backgroundColor = line.getAttribute("style").split(";")[2].slice(7);
+	}
+	function unhover(e){
+		e.target.style.backgroundColor = "white";
+	}
 	function dropWirable(e){
 		//Why cant I do below?
 		//e.target.dispatchEvent(dropWirableEvent);
 		e.target.removeEventListener('dropWirableEvent',dropWirable);
 		e.target.removeEventListener('mousedown',startLine);
 	}
+	ioDiv.addEventListener('mousemove',hover);
+	ioDiv.addEventListener('mouseleave',unhover);
+
 }
 function ColOrRowPos(divCoords, isCol){
 	if(isCol){
