@@ -166,6 +166,7 @@ function makeWireable(ioDiv){
 	}
 
 	function dropLine(e){
+		//There is some bug here
 		try{
 			if(e.target.getAttribute("class").includes("wirable")){
 				let isCol = ioLine.getAttribute("isCol") == "true";
@@ -176,6 +177,7 @@ function makeWireable(ioDiv){
 				} else {
 					attr = "lineRow"
 				}
+				console.log(e.target.getAttribute(attr));
 				if(e.target.getAttribute(attr) != null){
 					throw "already wired";
 				}
@@ -197,11 +199,9 @@ function makeWireable(ioDiv){
 				throw "not wirable";
 			}
 		} catch( error ){
-				if(error != "already wired"){
-					points = ioLine.getAttribute("points").split(" ");
-					points[points.length - 1] = points[points.length - 2];
-					ioLine.setAttribute("points", points.join(" "));
-				}
+			points = ioLine.getAttribute("points").split(" ");
+			points[points.length - 1] = points[points.length - 2];
+			ioLine.setAttribute("points", points.join(" "));
 		}
 		window.removeEventListener('mousemove', dragLine);
 		window.removeEventListener('mouseup', dropLine);
@@ -239,6 +239,8 @@ function makeWireable(ioDiv){
 		//e.target.dispatchEvent(dropWirableEvent);
 		e.target.removeEventListener('dropWirableEvent',dropWirable);
 		e.target.removeEventListener('mousedown',startLine);
+		e.target.removeEventListener('mousemove', hover);
+		e.target.removeEventListener('mouseleave',unhover);
 	}
 	ioDiv.addEventListener('mousemove',hover);
 	ioDiv.addEventListener('mouseleave',unhover);
@@ -303,6 +305,7 @@ function getAdjustedCoords(targetDivRect, svgRect){
 function updateSvg(element){
 	ioDiv = element.previousElementSibling.previousElementSibling;
 	//UPDATE GET ATTRIBUTE
+	//TODO cancel the change if any key cannot be moved to col or row
 	const lineId = ioDiv.getAttribute("line")+"line";
 	ioLine = document.querySelector("#" + lineId);
 	ioLine.setAttribute("isCol", element.value == "col");
