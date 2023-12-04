@@ -127,20 +127,27 @@ function makeAllWirable(){
 }
 function makeWireable(ioDiv){
 	let ioLine;
+	let colLine;
+	let rowLine;
 	ioDiv.addEventListener('mousedown',startLine);
 	ioDiv.addEventListener('dropWirableEvent', dropWirable);
 	function startLine(e){
 		e.preventDefault();
-	//TODO make a way to edit effectively
-	//	if( e.button == 2) {
-	//		ioLine = CreateOrGetLine(ioDiv, e, false);
-	//		window.addEventListener('mousemove',dragEditLine);
-	//		window.addEventListener('mouseup', dropEditLine);
-	//	} else if ( e.button == 0){
-			ioLine = CreateOrGetLine(ioDiv, e, true);
-			window.addEventListener('mousemove',dragLine);
-			window.addEventListener('mouseup',dropLine);
-	//	}
+		console.log(e);
+		colLine = CreateOrGetLine(ioDiv,e,true,true);
+		rowLine = CreateOrGetLine(ioDiv,e,true,false);
+		console.log(colLine);
+		console.log(rowLine);
+		let isCol;
+		if(e.layerX < 25){
+			ioLine = colLine;
+		} else {
+			ioLine = rowLine;
+		}
+		console.log(ioLine);
+		console.log(e);
+		window.addEventListener('mousemove',dragLine);
+		window.addEventListener('mouseup',dropLine);
 	}
 	function dragLine(e){
 		adjustedCoords = getAdjustedCoords(e,document.querySelector("#wiring-svg").getBoundingClientRect());
@@ -161,6 +168,17 @@ function makeWireable(ioDiv){
 	function dropLine(e){
 		try{
 			if(e.target.getAttribute("class").includes("wirable")){
+				let isCol = ioLine.getAttribute("isCol") == "true";
+				let attr;
+				//TODO Make this ternary operator
+				if(isCol){
+					attr = "linecol"
+				} else {
+					attr = "lineRow"
+				}
+				if(e.target.getAttribute(attr) != null){
+					throw "already wired";
+				}
 				adjustedCoords = getAdjustedCoords(e.target.getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
 				adjustedCoords = ColOrRowPos(adjustedCoords,ioLine.getAttribute("isCol") == "true");
 				//console.log(adjustedCoords);
@@ -169,18 +187,21 @@ function makeWireable(ioDiv){
 				points[points.length - 1] = coordString;
 				ioLine.setAttribute("points", points.join(" "));
 				makeWireable(e.target);
-				e.target.setAttribute("line", ioLine.getAttribute("id").slice(0,-4));
+				
+				e.target.setAttribute(attr, ioLine.getAttribute("id").slice(0,-4));
 				e.target.setAttribute("lineindex", ioLine.getAttribute("buttoncount"));
 				ioLine.setAttribute("buttoncount",(parseInt(ioLine.getAttribute("buttoncount")) + 1).toString());
-				ioDiv.removeEventListener('mousedown',startLine);	
+//				ioDiv.removeEventListener('mousedown',startLine);	
 				e.target.addEventListener('dropWirableEvent', dropWirable);
 			} else {
-				throw Error("not wirable");
+				throw "not wirable";
 			}
 		} catch( error ){
-				points = ioLine.getAttribute("points").split(" ");
-				points[points.length - 1] = points[points.length - 2];
-				ioLine.setAttribute("points", points.join(" "));
+				if(error != "already wired"){
+					points = ioLine.getAttribute("points").split(" ");
+					points[points.length - 1] = points[points.length - 2];
+					ioLine.setAttribute("points", points.join(" "));
+				}
 		}
 		window.removeEventListener('mousemove', dragLine);
 		window.removeEventListener('mouseup', dropLine);
@@ -192,17 +213,23 @@ function makeWireable(ioDiv){
 		console.log(ioDiv);
 	}
 	function hover(e){
-		line = document.querySelector("#" + e.target.getAttribute("line") + "line");
-	//	if(line.getAttribute("isCol") == "true"){
-	//		if(e.layerX > 25){
-	//			return;
-	//		}
-	//	} else {
-	//		if(e.layerX <= 25){
-	//			return;
-	//		}
-	//	}
+		//TODO UPDATE GET ATTRIBUTE
+		let attr;
+		let isCol;
+		if(e.layerX < 25){
+			attr = "linecol";
+			isCol = true;
+		} else {
+			attr = "linerow";
+			isCol = false;
+		}
+		try{
+		//line = document.querySelector("#" + e.target.getAttribute(attr) + "line");
+		line = CreateOrGetLine(ioDiv,e,false,isCol);
 		e.target.style.backgroundColor = line.getAttribute("style").split(";")[2].slice(7);
+		}catch (error){
+
+		}
 	}
 	function unhover(e){
 		e.target.style.backgroundColor = "white";
@@ -227,10 +254,22 @@ function ColOrRowPos(divCoords, isCol){
 	}	
 	return divCoords;
 }
-function CreateOrGetLine(ioDiv, e, addpoint){
-	const lineId = ioDiv.getAttribute("line")+"line";
+function CreateOrGetLine(ioDiv, e, addpoint, isCol){
+	//UPDATE GET ATTRIBUTE
+	let attr;
+	//TODO Make this ternary operator
+	if(isCol){
+		attr = "linecol"
+	} else {
+		attr = "linerow"
+	}
+	const lineId = ioDiv.getAttribute(attr)+"line";
 	ioLine = document.querySelector("#" + lineId);
-	if(ioLine == null) { 
+	if(ioLine == null) {
+		maybeline = document.querySelector("#" + ioDiv.getAttribute("line") + "line");
+		if(maybeline != null){
+			return maybeline;
+		}
 		if (!ioDiv.getAttribute("class").includes("gpio")){
 			return;
 		}
@@ -263,6 +302,7 @@ function getAdjustedCoords(targetDivRect, svgRect){
 }
 function updateSvg(element){
 	ioDiv = element.previousElementSibling.previousElementSibling;
+	//UPDATE GET ATTRIBUTE
 	const lineId = ioDiv.getAttribute("line")+"line";
 	ioLine = document.querySelector("#" + lineId);
 	ioLine.setAttribute("isCol", element.value == "col");
@@ -282,6 +322,7 @@ function updateSvg(element){
 }
 function removeLine(element){
 	ioDiv = element.previousElementSibling.previousElementSibling.previousElementSibling;
+	//UPDATE GET ATTRIBUTE
 	const lineId = ioDiv.getAttribute("line")+"line";
 	ioLine = document.querySelector("#" + lineId);
 	//Loop thru the line and get each key and drop this as a line
