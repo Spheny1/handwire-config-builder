@@ -133,21 +133,25 @@ function makeWireable(ioDiv){
 	ioDiv.addEventListener('dropWirableEvent', dropWirable);
 	function startLine(e){
 		e.preventDefault();
-		console.log(e);
+		//console.log(e);
 		colLine = CreateOrGetLine(ioDiv,e,true,true);
 		rowLine = CreateOrGetLine(ioDiv,e,true,false);
-		console.log(colLine);
-		console.log(rowLine);
+		//console.log(colLine);
+		//console.log(rowLine);
+		//Since Buttons may have more than 1 startline we need to only set ioline for the ones that have it setup
+		if(ioLine != null){
+			return
+		}
 		let isCol;
 		if(e.layerX < 25){
 			ioLine = colLine;
+			window.addEventListener('mousemove',dragLine);
+			window.addEventListener('mouseup',dropLine);
 		} else {
 			ioLine = rowLine;
+			window.addEventListener('mousemove',dragLine);
+			window.addEventListener('mouseup',dropLine);
 		}
-		console.log(ioLine);
-		console.log(e);
-		window.addEventListener('mousemove',dragLine);
-		window.addEventListener('mouseup',dropLine);
 	}
 	function dragLine(e){
 		adjustedCoords = getAdjustedCoords(e,document.querySelector("#wiring-svg").getBoundingClientRect());
@@ -169,15 +173,19 @@ function makeWireable(ioDiv){
 		//There is some bug here
 		try{
 			if(e.target.getAttribute("class").includes("wirable")){
+				//console.log(e);
+				//console.log(ioLine);
+				//console.log(ioDiv);
 				let isCol = ioLine.getAttribute("isCol") == "true";
 				let attr;
 				//TODO Make this ternary operator
 				if(isCol){
 					attr = "linecol"
 				} else {
-					attr = "lineRow"
+					attr = "linerow"
 				}
-				console.log(e.target.getAttribute(attr));
+				//console.log(attr);
+				//console.log(e.target.getAttribute(attr));
 				if(e.target.getAttribute(attr) != null){
 					throw "already wired";
 				}
@@ -199,6 +207,8 @@ function makeWireable(ioDiv){
 				throw "not wirable";
 			}
 		} catch( error ){
+			console.log("something went wrong");
+			console.log(error);
 			points = ioLine.getAttribute("points").split(" ");
 			points[points.length - 1] = points[points.length - 2];
 			ioLine.setAttribute("points", points.join(" "));
