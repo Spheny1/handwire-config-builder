@@ -1,3 +1,8 @@
+const addLineEvent = new Event('addLineEvent', {
+	bubble: true,
+	cancelable: true,
+	composed: false
+});
 function makeConfigRequestJson(event){
         event.detail.parameters.name = 'test';
 	rowArray = [];
@@ -98,60 +103,63 @@ function ChangeVerticalTab(toLayer, tabToSelect){
 	document.querySelector(".vertical-tab-selected").classList.remove(".vertical-tab-selected");
 	tabToSelect.classList.add(".vertical-tab-selected");
 	if(toLayer == 0){
-		//console.log("to keymap");
 		document.querySelector("#keymap-editor").classList.remove("hide");
 		document.querySelector("#wiring-editor").classList.add("hide");
 		document.querySelector("#layout-editor").classList.add("hide");
 	} else if(toLayer == 1){
-		//console.log("to wiring");
 		document.querySelector("#keymap-editor").classList.add("hide");
 		document.querySelector("#wiring-editor").classList.remove("hide");
 		document.querySelector("#layout-editor").classList.add("hide");
 	} else {
-		//console.log("to layout");
 		document.querySelector("#keymap-editor").classList.add("hide");
 		document.querySelector("#wiring-editor").classList.add("hide");
 		document.querySelector("#layout-editor").classList.remove("hide");
 	}
 }
 function createWire(){
-	console.log("clicked");
-	svg = document.querySelector("#wiring-svg");
+	svg = document.querySelector("#wirin}g-svg");
 }
 
 function makeAllWirable(){
 	ioDivs = document.querySelectorAll(".gpio");
 	for(ioDiv of ioDivs){
 		makeWireable(ioDiv);
+		document.querySelector("#wiring-editor").classList.remove("hide");
+		ioDiv.newLine = CreateOrGetLine(ioDiv,ioDiv.getBoundingClientRect(),false,false);
+		ioDiv.dispatchEvent(addLineEvent);
+		document.querySelector("#wiring-editor").classList.add("hide");
+
 	}
 }
 function makeWireable(ioDiv){
 	let ioLine;
+	//TODO Find a way to abstract this ideally In the future I want to use this for rotary encoders as well
+	let ioLines = [null,null];
 	let colLine;
 	let rowLine;
+	ioDiv.setAttribute("iswired","true");
 	ioDiv.addEventListener('mousedown',startLine);
-	ioDiv.addEventListener('dropWirableEvent', dropWirable);
+	ioDiv.addEventListener('dropWirableEvent', removeLine);
+	ioDiv.addEventListener('addLineEvent',addLine);
 	function startLine(e){
 		e.preventDefault();
-		//console.log(e);
-		colLine = CreateOrGetLine(ioDiv,e,true,true);
-		rowLine = CreateOrGetLine(ioDiv,e,true,false);
-		//console.log(colLine);
-		//console.log(rowLine);
-		//Since Buttons may have more than 1 startline we need to only set ioline for the ones that have it setup
-		if(ioLine != null){
-			return
-		}
 		let isCol;
 		if(e.layerX < 25){
-			ioLine = colLine;
-			window.addEventListener('mousemove',dragLine);
-			window.addEventListener('mouseup',dropLine);
+			if(ioLines[0] == null){
+				return
+			}
+		ioLine = ioLines[0];
 		} else {
-			ioLine = rowLine;
-			window.addEventListener('mousemove',dragLine);
-			window.addEventListener('mouseup',dropLine);
+			if(ioLines[1] == null){
+				return
+			}
+		ioLine = ioLines[1];
 		}
+		points = ioLine.getAttribute("points").split(" ");
+		ioLine.setAttribute("points", points.join(" ") + " " + points[points.length - 1]);
+		window.addEventListener('mousemove',dragLine);
+		window.addEventListener('mouseup',dropLine);
+
 	}
 	function dragLine(e){
 		adjustedCoords = getAdjustedCoords(e,document.querySelector("#wiring-svg").getBoundingClientRect());
@@ -170,12 +178,8 @@ function makeWireable(ioDiv){
 	}
 
 	function dropLine(e){
-		//There is some bug here
 		try{
 			if(e.target.getAttribute("class").includes("wirable")){
-				//console.log(e);
-				//console.log(ioLine);
-				//console.log(ioDiv);
 				let isCol = ioLine.getAttribute("isCol") == "true";
 				let attr;
 				//TODO Make this ternary operator
@@ -184,25 +188,26 @@ function makeWireable(ioDiv){
 				} else {
 					attr = "linerow"
 				}
-				//console.log(attr);
-				//console.log(e.target.getAttribute(attr));
 				if(e.target.getAttribute(attr) != null){
 					throw "already wired";
 				}
 				adjustedCoords = getAdjustedCoords(e.target.getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
 				adjustedCoords = ColOrRowPos(adjustedCoords,ioLine.getAttribute("isCol") == "true");
-				//console.log(adjustedCoords);
 				coordString = adjustedCoords.x + "," + adjustedCoords.y;
 				points = ioLine.getAttribute("points").split(" ");
 				points[points.length - 1] = coordString;
 				ioLine.setAttribute("points", points.join(" "));
-				makeWireable(e.target);
-				
+				if(e.target.getAttribute("iswired") == "true"){
+					e.target.newLine = ioLine;
+					e.target.dispatchEvent(addLineEvent);
+				} else {
+					makeWireable(e.target);
+					e.target.newLine = ioLine;
+					e.target.dispatchEvent(addLineEvent);
+				}
 				e.target.setAttribute(attr, ioLine.getAttribute("id").slice(0,-4));
-				e.target.setAttribute("lineindex", ioLine.getAttribute("buttoncount"));
+				e.target.setAttribute(attr + "index", ioLine.getAttribute("buttoncount"));
 				ioLine.setAttribute("buttoncount",(parseInt(ioLine.getAttribute("buttoncount")) + 1).toString());
-//				ioDiv.removeEventListener('mousedown',startLine);	
-				e.target.addEventListener('dropWirableEvent', dropWirable);
 			} else {
 				throw "not wirable";
 			}
@@ -220,7 +225,7 @@ function makeWireable(ioDiv){
 	function dropEditLine(e){
 		window.removeEventListener('mousemove', dragEditLine);
 		window.removeEventListener('mouseup', dropEditLine);
-		console.log(ioDiv);
+		//console.log(ioDiv);
 	}
 	function hover(e){
 		//TODO UPDATE GET ATTRIBUTE
@@ -234,8 +239,7 @@ function makeWireable(ioDiv){
 			isCol = false;
 		}
 		try{
-		//line = document.querySelector("#" + e.target.getAttribute(attr) + "line");
-		line = CreateOrGetLine(ioDiv,e,false,isCol);
+		line = CreateOrGetLine(ioDiv,e.target.getBoundingClientRect(),false,isCol);
 		e.target.style.backgroundColor = line.getAttribute("style").split(";")[2].slice(7);
 		}catch (error){
 
@@ -247,10 +251,51 @@ function makeWireable(ioDiv){
 	function dropWirable(e){
 		//Why cant I do below?
 		//e.target.dispatchEvent(dropWirableEvent);
-		e.target.removeEventListener('dropWirableEvent',dropWirable);
+		line = e.target.line;
+		let isCol = line.getAttribute("isCol") == "true";
+		let attr;
+		//TODO Make this ternary operator
+		if(isCol){
+			attr = "linecol"
+		} else {
+			attr = "linerow"
+		}
+		e.target.removeAttribute(attr);
+		e.target.removeAttribute(attr+"index");
+		e.target.removeAttribute("iswired");
+		e.target.removeEventListener('dropWirableEvent',removeLine);
 		e.target.removeEventListener('mousedown',startLine);
 		e.target.removeEventListener('mousemove', hover);
 		e.target.removeEventListener('mouseleave',unhover);
+		e.target.removeEventListener('addLineEvent',addLine)
+	}
+	function removeLine(e){
+		lineToRemove = e.target.line;
+		for(line in ioLines) {
+			if(ioLines[line] == lineToRemove){
+				ioLines[line] = null;
+				break;
+			}
+		}
+		let allNull = true;
+		for(line of ioLines){
+			if (line != null){
+				allNull = false;
+				break;
+			}
+		}
+		if(allNull){
+			dropWirable(e);
+		}
+	}
+	function addLine(e){
+		newLine = e.currentTarget.newLine	
+		//Refactor the polyLine to have its own index attached to the line based on Row/Col
+		if(newLine.getAttribute("isCol") == "true"){
+			ioLines[0] = newLine;
+		} else {
+			ioLines[1] = newLine;
+		}
 	}
 	ioDiv.addEventListener('mousemove',hover);
 	ioDiv.addEventListener('mouseleave',unhover);
@@ -266,7 +311,7 @@ function ColOrRowPos(divCoords, isCol){
 	}	
 	return divCoords;
 }
-function CreateOrGetLine(ioDiv, e, addpoint, isCol){
+function CreateOrGetLine(ioDiv, rect, addpoint, isCol){
 	//UPDATE GET ATTRIBUTE
 	let attr;
 	//TODO Make this ternary operator
@@ -290,10 +335,9 @@ function CreateOrGetLine(ioDiv, e, addpoint, isCol){
 		polyline.setAttribute("id",ioDivName + "line");
 		polyline.setAttribute("style", "fill:none;stroke-width:3;stroke:" + getColor(ioDivName));
 		polyline.setAttribute("buttoncount","0");
-		coords = getAdjustedCoords(e.target.getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
-		polyline.setAttribute("points", coords.x + "," + coords.y + " " + coords.x + "," + coords.y);
+		coords = getAdjustedCoords(rect,document.querySelector("#wiring-svg").getBoundingClientRect());
+		polyline.setAttribute("points", coords.x + "," + coords.y);
 		polyline.setAttribute("isCol", ioDiv.nextElementSibling.nextElementSibling.value == "col");
-		//console.log(polyline);
 		ioDiv.setAttribute("line",ioDivName);
 		return polyline;
 	}
@@ -312,14 +356,13 @@ function getAdjustedCoords(targetDivRect, svgRect){
 		y: (targetDivRect.y + (targetDivRect.height ?? 0)/2) - svgRect.y
 	};
 }
+//TODO UPDATE THIS TO THROW AN ERROR IF THERE IS ALREADY A WIRE IN THE TARGET 
 function updateSvg(element){
 	ioDiv = element.previousElementSibling.previousElementSibling;
 	//UPDATE GET ATTRIBUTE
-	//TODO cancel the change if any key cannot be moved to col or row
 	const lineId = ioDiv.getAttribute("line")+"line";
 	ioLine = document.querySelector("#" + lineId);
 	ioLine.setAttribute("isCol", element.value == "col");
-	// loop thru points and update them to be the col/row position
 	points = ioLine.getAttribute("points").split(" ");
 	
 	for (p in points){
@@ -346,10 +389,11 @@ function removeLine(element){
 		coords = points[p].split(",");
 		button = getElementFromSvgPoint( parseInt(coords[0]),parseInt(coords[1]), document.querySelector("#wiring-svg").getBoundingClientRect());
 		//console.log(button);
+		button.line = ioLine;
 		button.dispatchEvent(dropWirableEvent);
 		//return;
 	}
-	ioLine.remove();
+	ioLine.setAttribute("points", points[0]);
 	ioDiv.removeAttribute("line")
 
 }
@@ -368,3 +412,4 @@ const dropWirableEvent = new Event('dropWirableEvent', {
 	cancelable: true,
 	composed: false
 });
+
