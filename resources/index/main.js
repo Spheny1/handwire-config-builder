@@ -362,18 +362,53 @@ function updateSvg(element){
 	//UPDATE GET ATTRIBUTE
 	const lineId = ioDiv.getAttribute("line")+"line";
 	ioLine = document.querySelector("#" + lineId);
-	ioLine.setAttribute("isCol", element.value == "col");
+	let isCol = ioLine.getAttribute("isCol") == "true";
+	let attr;
+	let colString;
+	//TODO Make this ternary operator
+	if(!isCol){
+		attr = "linecol";
+		notAttr = "linerow"
+		colString = "true";
+	} else {
+		attr = "linerow"
+		notAttr ="linecol";
+		colString = "false";
+	}
 	points = ioLine.getAttribute("points").split(" ");
-	
+
+	for(point of points){
+		coords = point.split(",");
+		button = getElementFromSvgPoint( parseInt(coords[0]),parseInt(coords[1]), document.querySelector("#wiring-svg").getBoundingClientRect())
+		adjustedCoords = getAdjustedCoords(button.getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
+		adjustedCoords = ColOrRowPos(adjustedCoords,!isCol);
+		if(button.getAttribute(attr) != null){
+		//TODO DISPLAY ERRO
+			if(isCol){
+				element.value="col"
+			}else {
+				element.value="row";
+			}
+			return;
+		}
+	}
 	for (p in points){
 		if(p == 0) {continue;}
 		coords = points[p].split(",");
 		button = getElementFromSvgPoint( parseInt(coords[0]),parseInt(coords[1]), document.querySelector("#wiring-svg").getBoundingClientRect())
 		adjustedCoords = getAdjustedCoords(button.getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
-		adjustedCoords = ColOrRowPos(adjustedCoords,ioLine.getAttribute("isCol") == "true");
-
+		adjustedCoords = ColOrRowPos(adjustedCoords,!isCol);
+		//TODO why is setAttribute not working?
+		console.log(button);
+		console.log(notAttr);
+		console.log(ioLine.getAttribute("id").slice(0,-4))
+		button.setAttribute(notAttr,ioLine.getAttribute("id").slice(0,-4));
+		console.log(attr);
+		button.removeAttribute(attr);
 		points[p] = adjustedCoords.x.toString() + "," + adjustedCoords.y.toString();
 	}
+	console.log(colString);
+	ioLine.setAttribute("isCol", colString);
 	ioLine.setAttribute("points", points.join(" "));
 }
 function removeLine(element){
