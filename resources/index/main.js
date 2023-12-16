@@ -3,6 +3,11 @@ const addLineEvent = new Event('addLineEvent', {
 	cancelable: true,
 	composed: false
 });
+const switchEvent = new Event('switchEvent', {
+	bubble: true,
+	cancelable: true,
+	composed: false
+});
 function makeConfigRequestJson(event){
         event.detail.parameters.name = 'test';
 	rowArray = [];
@@ -141,6 +146,7 @@ function makeWireable(ioDiv){
 	ioDiv.addEventListener('mousedown',startLine);
 	ioDiv.addEventListener('dropWirableEvent', removeLine);
 	ioDiv.addEventListener('addLineEvent',addLine);
+	ioDiv.addEventListener('switchEvent',switchLines);
 	function startLine(e){
 		e.preventDefault();
 		let isCol;
@@ -267,7 +273,8 @@ function makeWireable(ioDiv){
 		e.target.removeEventListener('mousedown',startLine);
 		e.target.removeEventListener('mousemove', hover);
 		e.target.removeEventListener('mouseleave',unhover);
-		e.target.removeEventListener('addLineEvent',addLine)
+		e.target.removeEventListener('addLineEvent',addLine);
+		e.target.removeEventListener('switchEvent',switchLines);
 	}
 	function removeLine(e){
 		lineToRemove = e.target.line;
@@ -296,6 +303,12 @@ function makeWireable(ioDiv){
 		} else {
 			ioLines[1] = newLine;
 		}
+	}
+	function switchLines(e){
+		//TODO When dealing with wirables with more than 2 wires we need more complex logic here
+		let temp = ioLines[1];
+		ioLines[1] = ioLines[0];
+		ioLines[0] = temp;
 	}
 	ioDiv.addEventListener('mousemove',hover);
 	ioDiv.addEventListener('mouseleave',unhover);
@@ -405,6 +418,7 @@ function updateSvg(element){
 		button.setAttribute(notAttr,ioLine.getAttribute("id").slice(0,-4));
 		console.log(attr);
 		button.removeAttribute(attr);
+		button.dispatchEvent(switchEvent);
 		points[p] = adjustedCoords.x.toString() + "," + adjustedCoords.y.toString();
 	}
 	console.log(colString);
