@@ -54,7 +54,7 @@ pub fn build_keyboard_html(keyboard: Keyboard, circuitboard_html: String) -> Str
         let is_selected = if index == 0 { "tab-selected".to_string() } else { "".to_string() };
         proto_tab.push(format!(include_str!("../resources/tab.html"),is_selected, index, index, index + 1, index));
         for key_row in layer.chunks(keyboard.column.len()){
-            proto_layer.push(format!(include_str!("../resources/row.html"),key_row.iter().map(|key|{ key_index +=1; format!(include_str!("../resources/key-button.html"),keyboard.layout.get(&(key_index-1)).unwrap_or(&"1".to_string()),key)}).collect::<Vec<_>>().join("\n")));
+            proto_layer.push(format!(include_str!("../resources/row.html"),key_row.iter().map(|key|{ key_index +=1; format!(include_str!("../resources/key-button.html"),keyboard.layout.get(&(key_index-1)).unwrap_or(&"1".to_string()),key_index - 1,key)}).collect::<Vec<_>>().join("\n")));
         }
         proto_layers.push(format!(include_str!("../resources/row-container.html"),index,to_hide,proto_layer.join("\n")));
     }
@@ -62,7 +62,7 @@ pub fn build_keyboard_html(keyboard: Keyboard, circuitboard_html: String) -> Str
     for key_row_wiring in keyboard.layer[0].chunks(keyboard.column.len()){
         //TODO refactor so this uses the same file key0button.html as above
         //QUESTION do we want to reflect the keyboard for the wiring?
-        proto_wiring.push(format!(include_str!("../resources/row.html"),key_row_wiring.iter().map(|key|{wiring_index +=1; format!(include_str!("../resources/key-button-wirable.html"),keyboard.layout.get(&(wiring_index-1)).unwrap_or(&"1".to_string()))}).collect::<Vec<_>>().join("\n")));
+        proto_wiring.push(format!(include_str!("../resources/row.html"),key_row_wiring.iter().map(|key|{wiring_index +=1; format!(include_str!("../resources/key-button-wirable.html"),keyboard.layout.get(&(wiring_index-1)).unwrap_or(&"1".to_string()), wiring_index - 1)}).collect::<Vec<_>>().join("\n")));
     }
     format!(include_str!("../resources/keyboard.html"),proto_tab.join("\n"), proto_layers.join("\n"),proto_wiring.join("\n"), circuitboard_html,"wiring","layout-editor here")
 

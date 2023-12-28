@@ -12,12 +12,16 @@ function makeConfigRequestJson(event){
         event.detail.parameters.name = 'test';
 	rowArray = [];
 	colArray = [];
-	//Loop thru gpio elements push the proper col/row arrays
 	for(gpio of document.querySelectorAll(".gpio")){
+		line = CreateOrGetLine(gpio, gpio.getBoundingClientRect,false,"line");
+		if (line.getAttribute("points").split(" ").length == 1) {
+			continue;
+		}
+		if(gpio)
 		if(gpio.nextElementSibling.nextElementSibling.value == "col"){
-			rowArray.push(gpio.nextElementSibling.innerHTML);
-		} else {
 			colArray.push(gpio.nextElementSibling.innerHTML);
+		} else {
+			rowArray.push(gpio.nextElementSibling.innerHTML);
 		}
 	}
         event.detail.parameters.orientation = document.getElementById("orientation").value; 
@@ -25,31 +29,30 @@ function makeConfigRequestJson(event){
 	let layout = [];
 	let keys = document.getElementsByClassName("key");
 	event.detail.parameters.id = 0;
-	let layer = [];
-	
-	for(i in rowArray){
-		// get ioline
-		//
-		//Loop thru points and get key div at each
-		//
-	}
+	for(layer of document.querySelectorAll(".layer")){
 
-	//assign outer loop based on row-col and build the layers
-	//for( key of keys){
-	//	layer.push(key.value);
-	//	if(layer.length == event.detail.parameters.row.length * event.detail.parameters.column.length){
-	//		layout.push(layer);
-	//		while (layer.length > 0) {
-  	//			layer.pop();
-	//		}
-	//	}
-	//}		
+		let layers = [];
+		for(i = 0; i < rowArray.length * colArray.length; i++){
+			layers.push('KC.NO');
+		}
+		for(row in rowArray){
+			rowNum = parseInt(rowArray[row].substring(2));
+			for(col in colArray){
+				colNum = parseInt(colArray[col].substring(2));
+				name = document.querySelector('[linecol="io' + colArray[col].substring(2) + '"][linerow="io' + rowArray[row].substring(2) + '"]').getAttribute("name");
+				key = layer.querySelector('[name="' + name + '"]');
+				//TODO change this later when we change the key detection
+				value = key.firstElementChild.value;
+				layers[parseInt(row*colArray.length) + parseInt(col)] = value;
+			}
+		}
+		layout.push(layers);
+	}
 	event.detail.parameters.layer = layout;
 	event.detail.parameters.layout = {};
 	event.detail.parameters.default_circuit_id = 0;
 	event.detail.parameters.row = rowArray;
         event.detail.parameters.column = colArray;
-
 }
 function ChangeTab(layer, tabToSelect){
 	allRows = document.querySelectorAll(".layer");
@@ -130,7 +133,7 @@ function makeAllWirable(){
 	for(ioDiv of ioDivs){
 		makeWireable(ioDiv);
 		document.querySelector("#wiring-editor").classList.remove("hide");
-		ioDiv.newLine = CreateOrGetLine(ioDiv,ioDiv.getBoundingClientRect(),false,false);
+		ioDiv.newLine = CreateOrGetLine(ioDiv,ioDiv.getBoundingClientRect(),false,"");
 		ioDiv.dispatchEvent(addLineEvent);
 		document.querySelector("#wiring-editor").classList.add("hide");
 
@@ -245,13 +248,14 @@ function makeWireable(ioDiv){
 			isCol = false;
 		}
 		try{
-		line = CreateOrGetLine(ioDiv,e.target.getBoundingClientRect(),false,isCol);
+		line = CreateOrGetLine(ioDiv,e.target.getBoundingClientRect(),false,attr);
 		e.target.style.backgroundColor = line.getAttribute("style").split(";")[2].slice(7);
 		}catch (error){
 
 		}
 	}
 	function unhover(e){
+	//}		
 		e.target.style.backgroundColor = "white";
 	}
 	function dropWirable(e){
@@ -272,6 +276,7 @@ function makeWireable(ioDiv){
 		e.target.removeEventListener('dropWirableEvent',removeLine);
 		e.target.removeEventListener('mousedown',startLine);
 		e.target.removeEventListener('mousemove', hover);
+	//}		
 		e.target.removeEventListener('mouseleave',unhover);
 		e.target.removeEventListener('addLineEvent',addLine);
 		e.target.removeEventListener('switchEvent',switchLines);
@@ -324,15 +329,7 @@ function ColOrRowPos(divCoords, isCol){
 	}	
 	return divCoords;
 }
-function CreateOrGetLine(ioDiv, rect, addpoint, isCol){
-	//UPDATE GET ATTRIBUTE
-	let attr;
-	//TODO Make this ternary operator
-	if(isCol){
-		attr = "linecol"
-	} else {
-		attr = "linerow"
-	}
+function CreateOrGetLine(ioDiv, rect, addpoint, attr){
 	const lineId = ioDiv.getAttribute(attr)+"line";
 	ioLine = document.querySelector("#" + lineId);
 	if(ioLine == null) {
