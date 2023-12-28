@@ -38,7 +38,6 @@
 					{}
 				</div>
 				<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" id="wiring-svg">
-					{}
 				</svg>
 			</div>
 		</div>
@@ -49,5 +48,21 @@
 </div>
 <script>
 	makeAllWirable();
+	function setupWires(rowArr,colArr,wiringLayout){{
+		wiringLayer = document.querySelector("#wiring-container");
+		// for each rowArr get rowline
+		// iterate through the appropriate key and makeWirable()
+		for(col in colArr){{
+			 columnButtonNames = (wiringLayout.filter((key,index) => {{ return index%colArr.length == col;}}));	
+
+		}}
+		// for each colArr get colLine
+		// itterate though get index where modulo row length == this col index
+		for(row in rowArr){{
+			rowButtonNames = (wiringLayout.slice(colArr.length * row,(colArr.length * row) + colArr.length));
+		}}
+
+	}}
+	setupWires({});
 </script> 
 

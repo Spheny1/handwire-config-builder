@@ -12,6 +12,7 @@ pub struct Keyboard {
     pub orientation: String,
     pub layer: Vec<Vec<String>>,
     pub layout: HashMap<u8,String>,
+    pub wiring_layout: Vec<String>,
     pub default_circuit_id: u32,
 //    img: String,
 }
@@ -23,6 +24,7 @@ pub async fn get_keyboard_by_id(conn: &Connection, id: u32) -> Keyboard {
             let layer_string = row.get::<_,String>(5).unwrap(); 
             let row_string =  row.get::<_,String>(2).unwrap();
             let col_string =  row.get::<_,String>(3).unwrap();
+            let wiring_string = row.get::<_,String>(8).unwrap();
             let layout_vec: Vec<String> = serde_json::from_str(&row.get::<_,String>(6).unwrap()).unwrap();
             let mut layout_hashmap = HashMap::<u8,String>::new();
             layout_vec.iter().for_each(|element| {let key_value:Vec<&str> = element.split("-").collect(); layout_hashmap.insert(key_value[0].parse::<u8>().unwrap(), key_value[1].to_string());});
@@ -36,6 +38,7 @@ pub async fn get_keyboard_by_id(conn: &Connection, id: u32) -> Keyboard {
                 layer: serde_json::from_str(&layer_string).unwrap(),
                 layout: layout_hashmap,
                 default_circuit_id: row.get(7).unwrap(),
+                wiring_layout: serde_json::from_str(&wiring_string).unwrap(),
 //                img: row.get(6).unwrap(),
             })
         }).unwrap())
@@ -43,10 +46,18 @@ pub async fn get_keyboard_by_id(conn: &Connection, id: u32) -> Keyboard {
     
 }
 //TODO handle kc0row
+//TODO There is an issue with how rows and cols are being parsed it seems its all being stored in
+//the 0th index instead of splitting out all of the rows and cols
+//TODO create a new property Wiring-layout this will store the keys in order of wiring instead of
+//order of layout/layer
 pub fn build_keyboard_html(keyboard: Keyboard, circuitboard_html: String) -> String{
     let mut proto_layers:Vec<String> = Vec::new();  
     let mut proto_tab = Vec::new();
     let mut proto_wiring = Vec::new();
+    let mut setup_wires = Vec::new();
+    setup_wires.push(keyboard.row.join(","));
+    setup_wires.push(keyboard.column.join(","));
+    setup_wires.push(format!("[{}]",keyboard.wiring_layout.join(",")));
     for (index,layer) in keyboard.layer.iter().enumerate(){
         let mut key_index:u8 = 0;
         let mut proto_layer = Vec::new();
@@ -64,6 +75,5 @@ pub fn build_keyboard_html(keyboard: Keyboard, circuitboard_html: String) -> Str
         //QUESTION do we want to reflect the keyboard for the wiring?
         proto_wiring.push(format!(include_str!("../resources/row.html"),key_row_wiring.iter().map(|key|{wiring_index +=1; format!(include_str!("../resources/key-button-wirable.html"),keyboard.layout.get(&(wiring_index-1)).unwrap_or(&"1".to_string()), wiring_index - 1)}).collect::<Vec<_>>().join("\n")));
     }
-    format!(include_str!("../resources/keyboard.html"),proto_tab.join("\n"), proto_layers.join("\n"),proto_wiring.join("\n"), circuitboard_html,"wiring","layout-editor here")
-
+    format!(include_str!("../resources/keyboard.html"),proto_tab.join("\n"), proto_layers.join("\n"),proto_wiring.join("\n"), circuitboard_html,"layout-editor here", setup_wires.join(","))
 }
