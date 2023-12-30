@@ -19,9 +19,9 @@ function makeConfigRequestJson(event){
 		}
 		if(gpio)
 		if(gpio.nextElementSibling.nextElementSibling.value == "col"){
-			colArray.push(gpio.nextElementSibling.innerHTML);
+			colArray.push(gpio.nextElementSibling.innerHTML.substring(2));
 		} else {
-			rowArray.push(gpio.nextElementSibling.innerHTML);
+			rowArray.push(gpio.nextElementSibling.innerHTML.substring(2));
 		}
 	}
         event.detail.parameters.orientation = document.getElementById("orientation").value; 
@@ -39,7 +39,12 @@ function makeConfigRequestJson(event){
 			rowNum = parseInt(rowArray[row].substring(2));
 			for(col in colArray){
 				colNum = parseInt(colArray[col].substring(2));
-				name = document.querySelector('[linecol="io' + colArray[col].substring(2) + '"][linerow="io' + rowArray[row].substring(2) + '"]').getAttribute("name");
+				console.log('[linecol="io' + colArray[col] + '"][linerow="io' + rowArray[row] + '"]');
+				key = document.querySelector('[linecol="io' + colArray[col] + '"][linerow="io' + rowArray[row] + '"]');
+				if(key == null){
+					continue;
+				}
+				name = key.getAttribute("name");
 				key = layer.querySelector('[name="' + name + '"]');
 				//TODO change this later when we change the key detection
 				value = key.firstElementChild.value;
@@ -53,6 +58,7 @@ function makeConfigRequestJson(event){
 	event.detail.parameters.default_circuit_id = 0;
 	event.detail.parameters.row = rowArray;
         event.detail.parameters.column = colArray;
+	event.detail.parameters.wiring_layout = [];
 }
 function ChangeTab(layer, tabToSelect){
 	allRows = document.querySelectorAll(".layer");
@@ -127,15 +133,12 @@ function ChangeVerticalTab(toLayer, tabToSelect){
 function createWire(){
 	svg = document.querySelector("#wirin}g-svg");
 }
-
 function makeAllWirable(){
 	ioDivs = document.querySelectorAll(".gpio");
 	for(ioDiv of ioDivs){
 		makeWireable(ioDiv);
-		document.querySelector("#wiring-editor").classList.remove("hide");
 		ioDiv.newLine = CreateOrGetLine(ioDiv,ioDiv.getBoundingClientRect(),false,"");
 		ioDiv.dispatchEvent(addLineEvent);
-		document.querySelector("#wiring-editor").classList.add("hide");
 
 	}
 }
@@ -151,19 +154,29 @@ function makeWireable(ioDiv){
 	ioDiv.addEventListener('addLineEvent',addLine);
 	ioDiv.addEventListener('switchEvent',switchLines);
 	function startLine(e){
+//		console.log(e);
 		e.preventDefault();
-		let isCol;
-		if(e.layerX < 25){
-			if(ioLines[0] == null){
-				return
-			}
-		ioLine = ioLines[0];
-		} else {
-			if(ioLines[1] == null){
-				return
-			}
-		ioLine = ioLines[1];
+//		console.log(e.target.getBoundingClientRect());
+//		console.log(e.clientX - e.target.getBoundingClientRect());
+		width = e.target.getBoundingClientRect().width;
+		segmentSize = width/parseInt(ioDiv.getAttribute("maxWire"));
+		pointOnButton = e.clientX - e.target.getBoundingClientRect().x;
+		index = Math.trunc(pointOnButton/segmentSize);
+		ioLine = ioLines[index];
+		if(ioLine == null){
+			return;
 		}
+//		if(e.clientX - width < width/2){
+//			if(ioLines[0] == null){
+//				return
+//			}
+//		ioLine = ioLines[0];
+//		} else {
+//			if(ioLines[1] == null){
+//				return
+//			}
+//		ioLine = ioLines[1];
+//		}
 		points = ioLine.getAttribute("points").split(" ");
 		ioLine.setAttribute("points", points.join(" ") + " " + points[points.length - 1]);
 		window.addEventListener('mousemove',dragLine);
@@ -237,22 +250,16 @@ function makeWireable(ioDiv){
 		//console.log(ioDiv);
 	}
 	function hover(e){
-		//TODO UPDATE GET ATTRIBUTE
-		let attr;
-		let isCol;
-		if(e.layerX < 25){
-			attr = "linecol";
-			isCol = true;
-		} else {
-			attr = "linerow";
-			isCol = false;
+		width = e.target.getBoundingClientRect().width;
+		segmentSize = width/parseInt(ioDiv.getAttribute("maxWire"));
+		pointOnButton = e.clientX - e.target.getBoundingClientRect().x;
+		index = Math.trunc(pointOnButton/segmentSize);
+		line = ioLines[index]
+		if(line == null){
+			e.target.style.backgroundColor = "white";
+			return;
 		}
-		try{
-		line = CreateOrGetLine(ioDiv,e.target.getBoundingClientRect(),false,attr);
 		e.target.style.backgroundColor = line.getAttribute("style").split(";")[2].slice(7);
-		}catch (error){
-
-		}
 	}
 	function unhover(e){
 	//}		

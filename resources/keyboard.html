@@ -47,22 +47,54 @@
 	</div>
 </div>
 <script>
+	document.querySelector("#wiring-editor").classList.remove("hide");
 	makeAllWirable();
 	function setupWires(rowArr,colArr,wiringLayout){{
 		wiringLayer = document.querySelector("#wiring-container");
 		// for each rowArr get rowline
 		// iterate through the appropriate key and makeWirable()
 		for(col in colArr){{
-			 columnButtonNames = (wiringLayout.filter((key,index) => {{ return index%colArr.length == col;}}));	
-
+			columnButtonNames = (wiringLayout.filter((key,index) => {{ return (index%colArr.length == col) && key != -1;}}));	
+			document.querySelector("#select-gpio" + colArr[col].toString()).value = "col";	
+			ioDiv = document.querySelector("#gpio" + colArr[col].toString());
+			ioLine = CreateOrGetLine(ioDiv,ioDiv.getBoundingClientRect(),false,"");
+			DoWire(columnButtonNames,ioDiv,ioLine,-5);
 		}}
 		// for each colArr get colLine
 		// itterate though get index where modulo row length == this col index
 		for(row in rowArr){{
-			rowButtonNames = (wiringLayout.slice(colArr.length * row,(colArr.length * row) + colArr.length));
+			rowButtonNames = (wiringLayout.slice(colArr.length * row,(colArr.length * row) + colArr.length)).filter(key => {{return key != -1;}});
+			document.querySelector("#select-gpio" + rowArr[row].toString()).value = "row";
+			document.querySelector("#io" + rowArr[row].toString() + "line").setAttribute("isCol","false");
+			ioDiv = document.querySelector("#gpio" + rowArr[row].toString());
+			ioLine = CreateOrGetLine(ioDiv,ioDiv.getBoundingClientRect(),true,"");
+			DoWire(rowButtonNames,ioDiv,ioLine,5);
 		}}
-
+		
+	}}
+	function DoWire(arr,lastKey,ioLine, lX){{
+		for(button of arr){{
+			key = wiringLayer.querySelector('[name="' + button.toString() + '"]');
+			upPoint = key.getBoundingClientRect();
+			downPoint = lastKey.getBoundingClientRect();
+			mouseDownEvent = new MouseEvent("mousedown", {{
+				view: window,
+				bubbles: true,
+				clientX: downPoint.x + (downPoint.width/2)+ lX,
+				layerY: downPoint.y,
+				target: lastKey
+			}});
+			mouseUpEvent = new MouseEvent("mouseup", {{
+				view: window,
+				bubbles: true,
+				target: key
+			}});
+			lastKey.dispatchEvent(mouseDownEvent);
+			key.dispatchEvent(mouseUpEvent);
+			lastKey = key;
+		}}
 	}}
 	setupWires({});
+	document.querySelector("#wiring-editor").classList.add("hide");
 </script> 
 

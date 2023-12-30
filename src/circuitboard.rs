@@ -30,7 +30,7 @@ pub async fn get_circuitboard_by_id(conn: &Connection, id: u32) -> Circuitboard 
 pub fn build_circuitboard_html(circuitboard: Circuitboard) -> String{
     let mut proto_circuit_gpio = Vec::new();
     for(index, gpio) in circuitboard.ports.iter().enumerate(){
-        proto_circuit_gpio.push(format!(include_str!("../resources/circuit-row.html"), index.to_string(), gpio));
+        proto_circuit_gpio.push(format!(include_str!("../resources/circuit-row.html"), index.to_string(), gpio, index.to_string()));
     }
     format!(include_str!("../resources/col-container.html"),proto_circuit_gpio.join("\n"))
 }
