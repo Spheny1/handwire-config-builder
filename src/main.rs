@@ -1,7 +1,7 @@
 use axum::{routing::{get, post}, Router, Server,  extract, TypedHeader, response::IntoResponse, headers::ContentType, Extension};
 use std::net::SocketAddr;
 use tokio_rusqlite::{Connection};
-use crate::keyboard::{get_keyboard_by_id, Keyboard, build_keyboard_html};
+use crate::keyboard::{get_keyboard_by_id, Keyboard, build_keyboard_html, get_keyboard_ids,build_select};
 use crate::download_config::generate_config_file;
 use crate::circuitboard::{get_circuitboard_by_id, Circuitboard, build_circuitboard_html};
 use std::sync::Arc;
@@ -25,6 +25,7 @@ async fn main() {
         .route("/keycodes",get(keycode_handler))
         .route("/keyboard",get(keyboard_handler))
         .route("/circuitboard",get(circuitboard_handler))
+        .route("/keyboard/ids",get(keyboard_ids_handler))
         .nest_service("/",ServeDir::new("resources/index"))
         .layer(Extension(state));
   //      .route("/keyboard",get(keyboardHandler));
@@ -53,13 +54,18 @@ struct KeyboardParams{
     id: u32,
 }
 //TODO figure out if I need to refactor this
-async fn keyboard_handler( connection: Extension<Arc<State>>) -> impl IntoResponse{
-    let keyboard_params: KeyboardParams = KeyboardParams{id:0};
+async fn keyboard_handler( connection: Extension<Arc<State>>, keyboard_params: extract::Query<KeyboardParams>) -> impl IntoResponse{
     let keyboard = get_keyboard_by_id(&connection.connection, keyboard_params.id).await;
     let circuitboard_html = build_circuitboard_html(get_circuitboard_by_id(&connection.connection, keyboard.default_circuit_id).await);
     //println!("{:?}", keyboard);   
     (TypedHeader(ContentType::html()), build_keyboard_html(keyboard, circuitboard_html)) 
     
+}
+async fn keyboard_ids_handler( connection: Extension<Arc<State>>) -> impl IntoResponse{
+    let keyboard_ids = get_keyboard_ids(&connection.connection).await;
+    let keyboards = keyboard_ids.iter().map(|id| get_keyboard_by_id(&connection.connection,*id));
+    let keyboards = futures::future::join_all(keyboards).await;
+    (TypedHeader(ContentType::html()), build_select(keyboards)) 
 }
 #[derive(Deserialize)]
 struct CircuitParams{

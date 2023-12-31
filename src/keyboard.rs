@@ -45,11 +45,20 @@ pub async fn get_keyboard_by_id(conn: &Connection, id: u32) -> Keyboard {
     }).await.unwrap()
     
 }
-//TODO handle kc0row
+pub async fn get_keyboard_ids(conn: &Connection) -> Vec<u32>{
+    conn.call(move |conn| {
+        let mut ids: Vec<u32> = Vec::new();
+        let mut stmt = conn.prepare("select id from keyboards").unwrap();
+        let mut rows = stmt.query([])?;
+        while let Some(row) = rows.next()? {
+            ids.push(row.get(0)?);
+        }
+        Ok(ids)
+    }).await.unwrap()
+
+}
 //TODO There is an issue with how rows and cols are being parsed it seems its all being stored in
 //the 0th index instead of splitting out all of the rows and cols
-//TODO create a new property Wiring-layout this will store the keys in order of wiring instead of
-//order of layout/layer
 pub fn build_keyboard_html(keyboard: Keyboard, circuitboard_html: String) -> String{
     let mut proto_layers:Vec<String> = Vec::new();  
     let mut proto_tab = Vec::new();
@@ -76,4 +85,8 @@ pub fn build_keyboard_html(keyboard: Keyboard, circuitboard_html: String) -> Str
         proto_wiring.push(format!(include_str!("../resources/row.html"),key_row_wiring.iter().map(|key|{wiring_index +=1; format!(include_str!("../resources/key-button-wirable.html"),keyboard.layout.get(&(wiring_index-1)).unwrap_or(&"1".to_string()), wiring_index - 1)}).collect::<Vec<_>>().join("\n")));
     }
     format!(include_str!("../resources/keyboard.html"),proto_tab.join("\n"), proto_layers.join("\n"),proto_wiring.join("\n"), circuitboard_html,"layout-editor here", setup_wires.join(","))
+}
+
+pub fn build_select(keyboards: Vec<Keyboard>) -> String{
+    format!(include_str!("../resources/keyboard-select.html"),keyboards.iter().map(|keyboard| format!(include_str!("../resources/keyboard-select-option.html"), keyboard.id,keyboard.name)).collect::<Vec<String>>().join("\n"))
 }

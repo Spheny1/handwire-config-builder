@@ -42,11 +42,10 @@
 	</head>
 	<body>
 		<h1>Keyboard Configurator</h1>
-		<div>
-			
+		<!-- TODO update this to send a param for which layer to load up -->
+		<div class="selector" hx-get="/keyboard/ids" hx-trigger="load" >
 		</div>
-		<div class="keyboard" hx-get="/keyboard" hx-trigger="load">
-
+		<div class="keyboard" hx-get="/keyboard" hx-trigger="load" hx-on="htmx:configRequest: loadKeyboardRequestParams(event)">
 		</div><br>
 		<div id="config-div">
 			<div class='btn' hx-trigger="click" hx-post="/configdownload" hx-swap="outerHTML" hx-on="htmx:configRequest: makeConfigRequestJson(event)" hx-ext='json-enc'>

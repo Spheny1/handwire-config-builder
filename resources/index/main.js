@@ -60,6 +60,9 @@ function makeConfigRequestJson(event){
         event.detail.parameters.column = colArray;
 	event.detail.parameters.wiring_layout = [];
 }
+function loadKeyboardRequestParams(event) {
+	event.detail.parameters.id = 0;
+}
 function ChangeTab(layer, tabToSelect){
 	allRows = document.querySelectorAll(".layer");
 	for(row of allRows){
