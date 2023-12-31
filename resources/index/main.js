@@ -231,8 +231,6 @@ function makeWireable(ioDiv){
 					e.target.dispatchEvent(addLineEvent);
 				}
 				e.target.setAttribute(attr, ioLine.getAttribute("id").slice(0,-4));
-				e.target.setAttribute(attr + "index", ioLine.getAttribute("buttoncount"));
-				ioLine.setAttribute("buttoncount",(parseInt(ioLine.getAttribute("buttoncount")) + 1).toString());
 			} else {
 				throw "not wirable";
 			}
@@ -272,16 +270,6 @@ function makeWireable(ioDiv){
 		//Why cant I do below?
 		//e.target.dispatchEvent(dropWirableEvent);
 		line = e.target.line;
-		let isCol = line.getAttribute("isCol") == "true";
-		let attr;
-		//TODO Make this ternary operator
-		if(isCol){
-			attr = "linecol"
-		} else {
-			attr = "linerow"
-		}
-		e.target.removeAttribute(attr);
-		e.target.removeAttribute(attr+"index");
 		e.target.removeAttribute("iswired");
 		e.target.removeEventListener('dropWirableEvent',removeLine);
 		e.target.removeEventListener('mousedown',startLine);
@@ -293,12 +281,24 @@ function makeWireable(ioDiv){
 	}
 	function removeLine(e){
 		lineToRemove = e.target.line;
+		console.log(ioLines);
+		console.log(lineToRemove);
 		for(line in ioLines) {
 			if(ioLines[line] == lineToRemove){
 				ioLines[line] = null;
 				break;
 			}
 		}
+		let isCol = lineToRemove.getAttribute("isCol") == "true";
+		let attr;
+		//TODO Make this ternary operator
+		if(isCol){
+			attr = "linecol"
+		} else {
+			attr = "linerow"
+		}
+		e.target.removeAttribute(attr);
+		e.target.removeAttribute(attr+"index");
 		let allNull = true;
 		for(line of ioLines){
 			if (line != null){
@@ -354,7 +354,6 @@ function CreateOrGetLine(ioDiv, rect, addpoint, attr){
 		ioDivName = "io" + ioDiv.getAttribute("id").slice(4);
 		polyline.setAttribute("id",ioDivName + "line");
 		polyline.setAttribute("style", "fill:none;stroke-width:3;stroke:" + getColor(ioDivName));
-		polyline.setAttribute("buttoncount","0");
 		coords = getAdjustedCoords(rect,document.querySelector("#wiring-svg").getBoundingClientRect());
 		polyline.setAttribute("points", coords.x + "," + coords.y);
 		polyline.setAttribute("isCol", ioDiv.nextElementSibling.nextElementSibling.value == "col");
@@ -434,18 +433,16 @@ function updateSvg(element){
 }
 function removeLine(element){
 	ioDiv = element.previousElementSibling.previousElementSibling.previousElementSibling;
-	//UPDATE GET ATTRIBUTE
-	const lineId = ioDiv.getAttribute("line")+"line";
+	const lineId = ioDiv.getAttribute("id").substring(2)+"line";
 	ioLine = document.querySelector("#" + lineId);
-	//Loop thru the line and get each key and drop this as a line
 	points = ioLine.getAttribute("points").split(" ");
-	//This loop might be unecessary
 	for (p in points){
 		if(p == 0) {continue;}
 		coords = points[p].split(",");
 		button = getElementFromSvgPoint( parseInt(coords[0]),parseInt(coords[1]), document.querySelector("#wiring-svg").getBoundingClientRect());
-		//console.log(button);
+		console.log(button);
 		button.line = ioLine;
+		console.log(button.line);
 		button.dispatchEvent(dropWirableEvent);
 		//return;
 	}
