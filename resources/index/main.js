@@ -133,6 +133,13 @@ function ChangeVerticalTab(toLayer, tabToSelect){
 		document.querySelector("#layout-editor").classList.remove("hide");
 	}
 }
+function AddRow(){
+
+}
+
+function AddCol(){
+
+}
 function createWire(){
 	svg = document.querySelector("#wirin}g-svg");
 }

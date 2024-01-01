@@ -64,6 +64,7 @@ pub fn build_keyboard_html(keyboard: Keyboard, circuitboard_html: String) -> Str
     let mut proto_tab = Vec::new();
     let mut proto_wiring = Vec::new();
     let mut setup_wires = Vec::new();
+    let mut proto_layout = Vec::new();
     setup_wires.push(keyboard.row.join(","));
     setup_wires.push(keyboard.column.join(","));
     setup_wires.push(format!("[{}]",keyboard.wiring_layout.join(",")));
@@ -79,12 +80,15 @@ pub fn build_keyboard_html(keyboard: Keyboard, circuitboard_html: String) -> Str
         proto_layers.push(format!(include_str!("../resources/row-container.html"),index,to_hide,proto_layer.join("\n")));
     }
     let mut wiring_index:u8 = 0;
+    let mut layout_index:u8 = 0;
     for key_row_wiring in keyboard.layer[0].chunks(keyboard.column.len()){
         //TODO refactor so this uses the same file key0button.html as above
         //QUESTION do we want to reflect the keyboard for the wiring?
         proto_wiring.push(format!(include_str!("../resources/row.html"),key_row_wiring.iter().map(|key|{wiring_index +=1; format!(include_str!("../resources/key-button-wirable.html"),keyboard.layout.get(&(wiring_index-1)).unwrap_or(&"1".to_string()), wiring_index - 1)}).collect::<Vec<_>>().join("\n")));
+        proto_layout.push(format!(include_str!("../resources/row.html"),key_row_wiring.iter().map(|key|{layout_index +=1; format!(include_str!("../resources/key-button-layout.html"),layout_index-1,keyboard.layout.get(&(layout_index-1)).unwrap_or(&"1".to_string()))}).collect::<Vec<_>>().join("\n")));
     }
-    format!(include_str!("../resources/keyboard.html"),proto_tab.join("\n"), proto_layers.join("\n"),proto_wiring.join("\n"), circuitboard_html,"layout-editor here", setup_wires.join(","))
+
+    format!(include_str!("../resources/keyboard.html"),proto_tab.join("\n"), proto_layers.join("\n"),proto_wiring.join("\n"), circuitboard_html,proto_layout.join("\n"), setup_wires.join(","))
 }
 
 pub fn build_select(keyboards: Vec<Keyboard>) -> String{
