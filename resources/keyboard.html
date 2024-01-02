@@ -43,12 +43,12 @@
 		</div>
 		<div id="layout-editor" class="hide">
 			<div class="flex-container">
-				<div>
+				<div id="layout-row-holder">
 					{}
 				</div>
-				<button onclikc="AddCol()">Add Col</button>
+				<button onclick='AddCol(document.querySelector(".row").children.length)'>Add Col</button>
 			</div>
-			<button class="row" style="width:-moz-available;" onclick="AddRow()">Add Row</button>
+			<button class="row" style="width:-moz-available;" onclick='AddRow(document.querySelectorAll("div.row").length - 1)'>Add Row</button>
 		</div>
 	</div>
 </div>

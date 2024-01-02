@@ -133,12 +133,28 @@ function ChangeVerticalTab(toLayer, tabToSelect){
 		document.querySelector("#layout-editor").classList.remove("hide");
 	}
 }
-function AddRow(){
-
+function AddRow(pos){
+	layoutTab = document.querySelector("#layout-editor");
+	copyRow = document.querySelector("#layout-row-holder").children[pos] ?? document.querySelector("#layout-row-holder").lastElementChild;
+	if(pos == document.querySelector("#layout-row-holder").children.length){
+		document.querySelector("#layout-row-holder").appendChild(copyRow.cloneNode(true));
+	} else {
+		document.querySelector("#layout-row-holder").insertBefore(copyRow.cloneNode(true),copyRow);
+	}
 }
 
-function AddCol(){
-
+function AddCol(pos){
+	console.log(pos);
+	layoutTab = document.querySelector("#layout-editor");
+	highestName = document.querySelectorAll(".button").length;
+	for(row of layoutTab.querySelectorAll("div.row")){
+		console.log(row);
+		if(row.children[pos] == null){
+			row.appendChild(row.lastElementChild.cloneNode(true));
+		} else{
+			row.insertBefore(row.children[pos].cloneNode(true),row.children[pos]);
+		}
+	}
 }
 function createWire(){
 	svg = document.querySelector("#wirin}g-svg");
