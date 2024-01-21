@@ -135,26 +135,96 @@ function ChangeVerticalTab(toLayer, tabToSelect){
 }
 function AddRow(pos){
 	layoutTab = document.querySelector("#layout-editor");
-	copyRow = document.querySelector("#layout-row-holder").children[pos] ?? document.querySelector("#layout-row-holder").lastElementChild;
-	if(pos == document.querySelector("#layout-row-holder").children.length){
-		document.querySelector("#layout-row-holder").appendChild(copyRow.cloneNode(true));
-	} else {
-		document.querySelector("#layout-row-holder").insertBefore(copyRow.cloneNode(true),copyRow);
+	wiringTab = document.querySelector("#wiring-editor");
+	keymapTab = document.querySelector("#keymap-editor");
+	buttonCount = layoutTab.querySelectorAll(".button").length;
+	for (tab of [layoutTab,wiringTab,keymapTab]){ 
+		cur = buttonCount;
+		parent = tab.querySelector("div.row").parentElement;
+		copyRow = parent.children[pos] ?? parent.lastElementChild;
+		copiedRow = copyRow.cloneNode(true);
+		//TODO fix bug seems like its not inserting it last but instead before the last one?
+		console.log(pos);
+		console.log(parent.children.length);
+		if(pos == parent.children.length){
+			parent.appendChild(copiedRow);
+		} else {
+			console.log("hellow");
+			parent.insertBefore(copiedRow,copyRow);
+		}
+		for (button of copiedRow.children){
+			button.setAttribute("name",cur.toString());
+			cur++;
+		}
 	}
+	//TODO fix wiring
+	
+}
+function DelRow(pos){
+	layoutTab = document.querySelector("#layout-editor");
+	wiringTab = document.querySelector("#wiring-editor");
+	keymapTab = document.querySelector("#keymap-editor");
 }
 
 function AddCol(pos){
-	console.log(pos);
-	layoutTab = document.querySelector("#layout-editor");
-	highestName = document.querySelectorAll(".button").length;
-	for(row of layoutTab.querySelectorAll("div.row")){
-		console.log(row);
-		if(row.children[pos] == null){
-			row.appendChild(row.lastElementChild.cloneNode(true));
-		} else{
-			row.insertBefore(row.children[pos].cloneNode(true),row.children[pos]);
+	//Get current Wiring buttons and store them 
+	document.querySelector("#wiring-editor").classList.remove("hide");
+	wiresArray = []
+	for (wire of document.querySelectorAll("polyline")){
+		wiresArray.push({line:wire, buttonNames:[]});
+		points = wire.getAttribute("points").split(" ");
+		console.log(wire);
+		for (p in points){
+			if ( p == 0) {continue;}
+			coords = points[p].split(",");
+			console.log(coords);
+			console.log(getElementFromSvgPoint( parseInt(coords[0]),parseInt(coords[1]), document.querySelector("#wiring-svg").getBoundingClientRect()))
+			wiresArray[wiresArray.length - 1].buttonNames.push(getElementFromSvgPoint( parseInt(coords[0]),parseInt(coords[1]), document.querySelector("#wiring-svg").getBoundingClientRect()).getAttribute("name"));
 		}
 	}
+	layoutTab = document.querySelector("#layout-editor");
+	wiringTab = document.querySelector("#wiring-editor");
+	keymapTab = document.querySelector("#keymap-editor");
+	buttonCount = layoutTab.querySelectorAll(".button").length;
+	for (tab of [layoutTab,wiringTab,keymapTab]){
+		cur = buttonCount
+		for(row of tab.querySelectorAll("div.row")){
+			let button;
+			if(row.children[pos] == null){
+				button = row.lastElementChild.cloneNode(true);
+				row.appendChild(button);
+			} else{
+				button = row.children[pos].cloneNode(true);
+				row.insertBefore(button,row.children[pos]);
+			}
+			button.setAttribute("name",cur.toString());
+			cur++;
+		}
+	}
+	for(wire of wiresArray){
+		var modifyWirePoint = function(wire) {
+			return function(name,index) { 
+				let isCol = wire.getAttribute("isCol") == "true";
+				coordsOld = wire.getAttribute("points").split(" ")[index + 1].split(",").map(num => parseInt(num,10));
+				coordsNew = getAdjustedCoords(wiringTab.querySelector('[name="' + name + '"]').getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
+				newPoint = ColOrRowPos(coordsNew, isCol);
+				return newPoint.x.toString() + "," + newPoint.y.toString();
+			};
+		};
+		gpioCoord = getAdjustedCoords(document.querySelector("#gpio" + wire.line.getAttribute("id").slice(2,-4)).getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
+		gpioPoint = gpioCoord.x.toString() + "," + gpioCoord.y.toString();
+		newPoints = wire.buttonNames.map(modifyWirePoint(wire.line));
+		newPoints.unshift(gpioPoint);
+		wire.line.setAttribute("points", newPoints.join(" "));
+	}
+	document.querySelector("#wiring-editor").classList.add("hide");
+
+}
+
+function DelCol(pos){
+	layoutTab = document.querySelector("#layout-editor");
+	wiringTab = document.querySelector("#wiring-editor");
+	keymapTab = document.querySelector("#keymap-editor");
 }
 function createWire(){
 	svg = document.querySelector("#wirin}g-svg");
