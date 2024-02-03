@@ -177,6 +177,7 @@ function AddCol(pos){
 		for (p in points){
 			if ( p == 0) {continue;}
 			coords = points[p].split(",");
+			console.log(document.querySelector("#wiring-editor"));
 			console.log(coords);
 			console.log(getElementFromSvgPoint( parseInt(coords[0]),parseInt(coords[1]), document.querySelector("#wiring-svg").getBoundingClientRect()))
 			wiresArray[wiresArray.length - 1].buttonNames.push(getElementFromSvgPoint( parseInt(coords[0]),parseInt(coords[1]), document.querySelector("#wiring-svg").getBoundingClientRect()).getAttribute("name"));
@@ -201,22 +202,49 @@ function AddCol(pos){
 			cur++;
 		}
 	}
-	for(wire of wiresArray){
-		var modifyWirePoint = function(wire) {
-			return function(name,index) { 
-				let isCol = wire.getAttribute("isCol") == "true";
-				coordsOld = wire.getAttribute("points").split(" ")[index + 1].split(",").map(num => parseInt(num,10));
-				coordsNew = getAdjustedCoords(wiringTab.querySelector('[name="' + name + '"]').getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
-				newPoint = ColOrRowPos(coordsNew, isCol);
-				return newPoint.x.toString() + "," + newPoint.y.toString();
-			};
-		};
-		gpioCoord = getAdjustedCoords(document.querySelector("#gpio" + wire.line.getAttribute("id").slice(2,-4)).getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
-		gpioPoint = gpioCoord.x.toString() + "," + gpioCoord.y.toString();
-		newPoints = wire.buttonNames.map(modifyWirePoint(wire.line));
-		newPoints.unshift(gpioPoint);
-		wire.line.setAttribute("points", newPoints.join(" "));
+	for (removeButton of wiringTab.querySelectorAll(".x-button")){
+		removeLine(removeButton);
 	}
+	for(wire of wiresArray){
+		//isCol = wire.line.getAttribute("isCol") == "true";
+		lastKey = document.querySelector("#gpio" + wire.line.getAttribute("id").slice(2,-4)); 
+		for(button of wire.buttonNames){
+			key = wiringLayer.querySelector('[name="' + button.toString() + '"]');
+			upPoint = key.getBoundingClientRect();
+			downPoint = lastKey.getBoundingClientRect();
+			mouseDownEvent = new MouseEvent("mousedown", {
+				view: window,
+				bubbles: true,
+				clientX: downPoint.x + (downPoint.width/2)+ lX,
+				layerY: downPoint.y,
+				target: lastKey
+			});
+			mouseUpEvent = new MouseEvent("mouseup", {
+				view: window,
+				bubbles: true,
+				target: key
+			});
+			lastKey.dispatchEvent(mouseDownEvent);
+			key.dispatchEvent(mouseUpEvent);
+			lastKey = key;
+		}
+	}
+//	for(wire of wiresArray){
+//		var modifyWirePoint = function(wire) {
+//			return function(name,index) { 
+//				let isCol = wire.getAttribute("isCol") == "true";
+//				coordsOld = wire.getAttribute("points").split(" ")[index + 1].split(",").map(num => parseInt(num,10));
+//				coordsNew = getAdjustedCoords(wiringTab.querySelector('[name="' + name + '"]').getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
+//				newPoint = ColOrRowPos(coordsNew, isCol);
+//				return newPoint.x.toString() + "," + newPoint.y.toString();
+//			};
+//		};
+//		gpioCoord = getAdjustedCoords(document.querySelector("#gpio" + wire.line.getAttribute("id").slice(2,-4)).getBoundingClientRect(),document.querySelector("#wiring-svg").getBoundingClientRect());
+//		gpioPoint = gpioCoord.x.toString() + "," + gpioCoord.y.toString();
+//		newPoints = wire.buttonNames.map(modifyWirePoint(wire.line));
+//		newPoints.unshift(gpioPoint);
+//		wire.line.setAttribute("points", newPoints.join(" "));
+//	}
 	document.querySelector("#wiring-editor").classList.add("hide");
 
 }
@@ -226,8 +254,24 @@ function DelCol(pos){
 	wiringTab = document.querySelector("#wiring-editor");
 	keymapTab = document.querySelector("#keymap-editor");
 }
-function createWire(){
-	svg = document.querySelector("#wirin}g-svg");
+function makeWire(ioLine){
+	let keyButtons = []
+	let isCol;
+	ioLine.addEventListener('AppendPoint',AppendPoint);
+	ioLine.addEventListener('EditPoint',EditPoint);
+	ioLine.addEventListener('RemovePoint',RemovePoint);
+	function AppendPoint(e){
+		ioLine.setAttribute("points",ioLine.getAttribute("points") + e.point);
+	}
+	function EditPoint(e){
+		
+	}
+	function RemovePoint(e){
+
+	}
+	function AppendKey(e){
+		keyButtons.append(e.key);
+	}
 }
 function makeAllWirable(){
 	ioDivs = document.querySelectorAll(".gpio");
@@ -315,6 +359,7 @@ function makeWireable(ioDiv){
 				points = ioLine.getAttribute("points").split(" ");
 				points[points.length - 1] = coordString;
 				ioLine.setAttribute("points", points.join(" "));
+				ioLine.setAttribute("buttons",ioLine.getAttribute("buttons") + " " + e.target.getAttribute("name"));
 				if(e.target.getAttribute("iswired") == "true"){
 					e.target.newLine = ioLine;
 					e.target.dispatchEvent(addLineEvent);
@@ -374,8 +419,6 @@ function makeWireable(ioDiv){
 	}
 	function removeLine(e){
 		lineToRemove = e.target.line;
-		console.log(ioLines);
-		console.log(lineToRemove);
 		for(line in ioLines) {
 			if(ioLines[line] == lineToRemove){
 				ioLines[line] = null;
@@ -450,6 +493,7 @@ function CreateOrGetLine(ioDiv, rect, addpoint, attr){
 		coords = getAdjustedCoords(rect,document.querySelector("#wiring-svg").getBoundingClientRect());
 		polyline.setAttribute("points", coords.x + "," + coords.y);
 		polyline.setAttribute("isCol", ioDiv.nextElementSibling.nextElementSibling.value == "col");
+		polyline.setAttribute("buttons",ioDiv.getAttribute("id"));
 		ioDiv.setAttribute("line",ioDivName);
 		return polyline;
 	}
@@ -529,16 +573,15 @@ function removeLine(element){
 	const lineId = ioDiv.getAttribute("id").substring(2)+"line";
 	ioLine = document.querySelector("#" + lineId);
 	points = ioLine.getAttribute("points").split(" ");
+	//TODO get this to use just buttons instead of looping points
 	for (p in points){
 		if(p == 0) {continue;}
 		coords = points[p].split(",");
-		button = getElementFromSvgPoint( parseInt(coords[0]),parseInt(coords[1]), document.querySelector("#wiring-svg").getBoundingClientRect());
-		console.log(button);
+		button = document.querySelector("#wiring-editor").querySelector(`[name="${ioLine.getAttribute("buttons").split(" ")[p]}"]`); 
 		button.line = ioLine;
-		console.log(button.line);
 		button.dispatchEvent(dropWirableEvent);
-		//return;
 	}
+	ioLine.setAttribute("buttons",ioLine.getAttribute("buttons").split(" ")[0]);
 	ioLine.setAttribute("points", points[0]);
 	ioDiv.removeAttribute("line")
 
